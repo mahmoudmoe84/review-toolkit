@@ -8,6 +8,7 @@
 [![version](https://img.shields.io/badge/release-v1.0-blue?style=flat-square)](../../releases)
 [![agents](https://img.shields.io/badge/agents-plan--review%20%C2%B7%20code--excellence-8A2BE2?style=flat-square)](#-whats-inside)
 [![linter](https://img.shields.io/badge/mechanical%20layer-ruff-d7ff64?style=flat-square)](#%EF%B8%8F-known-limitations-disclosed-on-purpose)
+[![license](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
 [What's inside](#-whats-inside) •
 [How it works](#-how-it-works) •
