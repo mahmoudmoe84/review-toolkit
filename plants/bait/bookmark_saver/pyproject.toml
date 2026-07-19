@@ -1,0 +1,12 @@
+[project]
+name = "bookmark-saver"
+version = "0.1.0"
+description = "Bait project for reviewer plant tests. Not a real product."
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
