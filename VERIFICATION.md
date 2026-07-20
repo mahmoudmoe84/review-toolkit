@@ -17,19 +17,34 @@ cp review-doctrine.md ~/.claude/review-doctrine.md
 cp agents/plan-review.md agents/code-excellence.md ~/.claude/agents/
 ```
 
-**The plants run from anywhere.** They are plain files read relative to the
-session's working directory — they do NOT need to be in `~/.claude`. Every
-prompt below uses paths relative to the `plants/` directory, so start each
-session from there:
+**Run the plants from an isolated folder — this is a test-reliability
+requirement, not a convenience.** The plants are plain files read relative to
+the session's working directory, so they do NOT need to live in `~/.claude`.
+But the working directory must contain **only the plant kit**. Copy the
+`plants/` folder — and nothing else — into a clean, dedicated directory and
+launch every session from there:
 
 ```bash
-cd <this-repo>/plants
+cp -R <this-repo>/plants ~/Desktop/plant-lab   # the plant kit ONLY — no agents, no doctrine, no docs
+cd ~/Desktop/plant-lab
 pip install ruff   # or: uv tool install ruff — required for Plant 5's happy path
 claude             # fresh session per plant, launched from this directory
 ```
 
+**Why isolation matters.** The reviewer resolves plan/doc paths against the
+working directory. If you run from the repo root, `~/.claude`, or any folder
+that also holds *other* projects' draft or temp plan files, those stray files
+get pulled into the run — the reviewer ends up looking at a plan you never
+meant to test. The result is a plant that passes or fails for the wrong reason
+and cannot be reproduced. A folder holding nothing but the plant kit makes
+every prompt below resolve to exactly the file it names, every time. This is
+the difference between the plant kit working as a repeatable testing bed and
+producing a green table you can't trust.
+
 (Agents come from `~/.claude` regardless of cwd; plant files come from cwd.
-Those are two different discovery mechanisms — don't conflate them.)
+Those are two different discovery mechanisms — don't conflate them. Copy ONLY
+`plants/` into the lab folder; the agents, doctrine, README, and this file stay
+where they are.)
 
 **Ground rules for every plant:**
 - Fresh Claude Code session per plant. Fresh context is the mechanism —
@@ -169,7 +184,7 @@ exists to detect.
 
 **Setup:** confirm ruff is installed and finds the planted mechanical flaw:
 ```bash
-cd ~/.claude/plants/bait/bookmark_saver && ruff check .
+cd bait/bookmark_saver && ruff check .   # from your isolated plant-lab folder
 # expected: exactly one finding — F401, unused `hashlib` in storage/repo.py
 ```
 

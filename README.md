@@ -77,11 +77,14 @@ cp review-doctrine.md ~/.claude/review-doctrine.md
 cp agents/plan-review.md agents/code-excellence.md ~/.claude/agents/
 ```
 
-**The plants stay in this clone.** They're plain files read from the session's working directory — *agents install, plants travel*:
+**The plants are a testing bed — run them in an isolated folder.** They're plain files read from the session's working directory, so *agents install, plants travel* — but travel them into a **clean, dedicated directory** (e.g. `~/Desktop/plant-lab`), never the repo root, `~/.claude`, or any folder that also holds other projects' draft or temp plan files:
 
 ```bash
-cd plants && pip install ruff && claude   # then follow VERIFICATION.md
+cp -R plants ~/Desktop/plant-lab            # the plant kit ONLY — no agents, no doctrine, no docs
+cd ~/Desktop/plant-lab && pip install ruff && claude   # then follow VERIFICATION.md
 ```
+
+**Why the isolated folder is not optional.** The reviewer resolves plan/doc paths against the working directory. Launch from a shared root and it will pick up stray planning files left there by *other* projects — reviewing a plan you never meant to test. That's a plant that passes or fails for the wrong reason and can't be reproduced. A folder holding nothing but the plant kit makes every prompt in [VERIFICATION.md](VERIFICATION.md) resolve to exactly the file it names, every time. Copy **only** `plants/` here; the agents and doctrine already live in `~/.claude` (above).
 
 ## ✅ Verify before you trust
 
