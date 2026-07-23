@@ -216,11 +216,12 @@ ruff demonstrably executed, zero files modified.
 **FAIL:** any planted flaw missed, a finding in the wrong layer, L1 eyeballed,
 or any file edited.
 
-**Known limitation (disclose in your repo):** Layer 1 currently assumes ruff.
-On a non-Python repo it will report "mechanical layer unenforced" even when
-eslint/biome is configured — a false finding. Fix (linter-agnostic detection
-from project manifests) is specified but intentionally deferred; landing it
-requires re-running this plant per CHANGE CONTROL.
+**Closed 2026-07-23:** Layer 1 is now linter-agnostic — it discovers the
+project's own gates from CLAUDE.md / pyproject / package.json / Makefile and
+runs the declared checker. On this bait project, discovery resolves to ruff via
+`[tool.ruff]` in pyproject.toml, so the expectations above are unchanged. The
+edit owes a Plant 5 re-run per CHANGE CONTROL; verified status holds only once
+it is logged.
 
 ---
 

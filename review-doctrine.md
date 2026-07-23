@@ -33,6 +33,29 @@ Used ONLY when the project states none (see each agent's rules-loading step):
    files, mail, user content) treated as UNTRUSTED until validated. A missing
    validation at a boundary is a structural finding, not a judgment.
 
+## Reviewing tests
+- Every test must be able to go red. For each test judged, name the mutation to the
+  code under test that would redden it; if no such mutation exists, the test is
+  decoration — flag it.
+- Assert behavior/contract, not implementation. A test that breaks under a faithful
+  refactor is coupled to internals — flag the coupling.
+- No vacuous configurations: the setup must actually provoke the condition the test
+  claims to exercise (a "retry" test whose fake never fails tests nothing). Trace
+  setup → provocation → assertion; a missing link is a finding.
+- Fixtures must not guarantee the outcome. If the fixture hands the test the very
+  state the assertion checks, the test passes by construction — flag it.
+- Participation is asserted, not assumed. If a collaborator is claimed to be
+  exercised (mock called, handler invoked, path taken), the test must assert that
+  it was; "it probably ran" is not coverage.
+
+## Plan review: chunking and evidence
+- A plan step whose core-path diff would exceed ~200–300 changed lines is
+  mis-chunked. The finding targets the PLAN — split the step — never the code the
+  step would produce.
+- Evidence design belongs in the plan file itself: each step names the tests, logs,
+  or traces that will show it worked. A step with no stated evidence is a finding
+  against the plan.
+
 ## Finding quality
 - Order findings by leverage: correctness/security first, structure second, the
   rest after. One structural problem outweighs ten nits — never bury it. A few

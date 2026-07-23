@@ -4,10 +4,10 @@
 
 **Two Claude Code subagents that review plans and code against *your* project's documents — plus the test suite that keeps them honest.**
 
-[![verified](https://img.shields.io/badge/plants-6%2F6%20verified-2ea44f?style=flat-square)](VERIFICATION.md)
+[![verified](https://img.shields.io/badge/plants-re--run%20pending%20%283%2C4%2C5%29-orange?style=flat-square)](VERIFICATION.md)
 [![version](https://img.shields.io/badge/release-v1.0-blue?style=flat-square)](../../releases)
 [![agents](https://img.shields.io/badge/agents-plan--review%20%C2%B7%20code--excellence-8A2BE2?style=flat-square)](#-whats-inside)
-[![linter](https://img.shields.io/badge/mechanical%20layer-ruff-d7ff64?style=flat-square)](#%EF%B8%8F-known-limitations-disclosed-on-purpose)
+[![linter](https://img.shields.io/badge/mechanical%20layer-project--native-d7ff64?style=flat-square)](#-whats-inside)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
 [What's inside](#-whats-inside) •
@@ -25,8 +25,8 @@
 | Piece | What it does |
 |---|---|
 | 🗺️ **`plan-review`** | Two-pass plan reviewer. Pass 1 extracts the decisions the plan claims to rest on and makes **you** confirm them. Pass 2 reconciles those decisions against your design doc, then grills the plan in three tiers. A decision that contradicts the doc is a **BLOCKING** halt — the reviewer never silently picks a winner; that call is yours. |
-| 🧐 **`code-excellence`** | Three-layer code reviewer: **mechanical** (runs the linter — never eyeballs what a tool catches better), **structural** (your project's stated rules: layering, boundaries, security at inputs), and **judgment** (Ousterhout-style depth: does a docstring promise something no test enforces?). Read-only: it names issues and remedies, edits nothing. |
-| 📜 **`review-doctrine.md`** | The shared spine both agents load as their first action — and halt loudly without. Tier discipline, seven default architecture rules, finding-quality ordering, and the rule that *"nothing to cut" is a valid answer* — a reviewer forced to always produce findings is a reviewer that invents them. |
+| 🧐 **`code-excellence`** | Three-layer code reviewer: **mechanical** (discovers and runs the project's *own* declared lint/test gates — never eyeballs what a tool catches better), **structural** (your project's stated rules: layering, boundaries, security at inputs), and **judgment** (Ousterhout-style depth: does a docstring promise something no test enforces?). Read-only: it names issues and remedies, edits nothing. |
+| 📜 **`review-doctrine.md`** | The shared spine both agents load as their first action — and halt loudly without. Tier discipline, seven default architecture rules, test-review rules (every test must be able to go red — and you must name the mutation that reddens it), plan-chunking + evidence-design rules, finding-quality ordering, and the rule that *"nothing to cut" is a valid answer* — a reviewer forced to always produce findings is a reviewer that invents them. |
 | 🌱 **`plants/`** | The test suite. The agents are prompts; no compiler or pytest guards a prompt. Six planted-flaw scenarios with known answers are the only mechanism that makes "the reviewers work" a **checkable claim** instead of prose. See [VERIFICATION.md](VERIFICATION.md) for the exact run protocol. |
 
 ## ⚙️ How it works
@@ -98,7 +98,7 @@ The edit → re-plant map is at the bottom of [VERIFICATION.md](VERIFICATION.md)
 
 ## ⚠️ Known limitations (disclosed on purpose)
 
-- **Layer 1 is currently Python-hardcoded.** `code-excellence` assumes `ruff`; on a repo whose mechanical layer is enforced by eslint/biome/etc., it will report "mechanical layer unenforced" — a false finding. The fix (linter-agnostic detection from project manifests) is specified and deliberately deferred; landing it requires re-running plant 5 per change control.
+- ~~**Layer 1 is Python-hardcoded.**~~ **Closed 2026-07-23.** Layer 1 now discovers the project's own gates from its manifests (CLAUDE.md / pyproject / package.json / Makefile) and runs the declared checker — no assumed tool. Per change control this edit (plus new doctrine sections) owes re-runs of plants **3, 4, 5** — the badge above stays orange until they're logged in [VERIFICATION.md](VERIFICATION.md).
 - **Doctrine defaults vs your project's rules.** The seven architecture rules are defaults. Both agents read your project's own docs and stated rules first; the doctrine fills gaps, it doesn't override. A project with no stated rules is itself a flagged finding, not a license to assume.
 
 ## 💡 Design decisions worth stealing
