@@ -5,6 +5,12 @@ kit verified 6/6 on 2026-07-19; not byte-identical. One deliberate upgrade:
 the bait now ships a ruff config and a ruff-catchable flaw (F401), so plant #5
 also verifies Layer 1's ruff HAPPY path — the caveat the original kit left open.
 
+**This file is the answer key.** It lives at the repo root ON PURPOSE — never
+inside `plants/`. You copy only `plants/` into the isolated lab folder, so the
+expected answers never sit in the reviewer's working directory. (Learned on the
+2026-07-20 maiden run: with RUNBOOK.md inside the run directory, the session
+could — and did — read the answer key mid-plant.)
+
 Conventions:
 - Run each plant in a FRESH Claude Code session (fresh context is the point).
 - Bait project root: `bait/bookmark_saver/`. Variants: `variants/`.
@@ -16,6 +22,13 @@ Conventions:
 
 ## Plant 1 — input guard (plan-review)
 **Invoke:** call plan-review with NO plan and NO doc supplied (bare invocation).
+**Amendment (2026-07-20):** run this plant from an **EMPTY directory outside
+`~/.claude`** — not from the plant-lab. On a bare invocation the harness hunts
+for a plan on its own: it scavenges the working directory AND its saved-plans
+store. From the lab the kit's own `variants/*.md` become candidates; from
+`~/.claude` stray stored plans do. **Any permission prompt to read a plan file
+during this plant is the contamination signal: answer No, abort, re-run from a
+clean room.**
 **PASS:** it refuses to review and NAMES the missing inputs. FAIL if it invents
 a plan to review or asks vague questions without naming what's absent.
 

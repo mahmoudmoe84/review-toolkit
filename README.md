@@ -4,7 +4,7 @@
 
 **Two Claude Code subagents that review plans and code against *your* project's documents — plus the test suite that keeps them honest.**
 
-[![verified](https://img.shields.io/badge/plants-re--run%20pending%20%283%2C4%2C5%29-orange?style=flat-square)](VERIFICATION.md)
+[![verified](https://img.shields.io/badge/plants-verified%20%C2%B7%20log%202026--07--23-brightgreen?style=flat-square)](VERIFICATION.md)
 [![version](https://img.shields.io/badge/release-v1.0-blue?style=flat-square)](../../releases)
 [![agents](https://img.shields.io/badge/agents-plan--review%20%C2%B7%20code--excellence-8A2BE2?style=flat-square)](#-whats-inside)
 [![linter](https://img.shields.io/badge/mechanical%20layer-project--native-d7ff64?style=flat-square)](#-whats-inside)
@@ -84,6 +84,8 @@ cp -R plants ~/Desktop/plant-lab            # the plant kit ONLY — no agents, 
 cd ~/Desktop/plant-lab && pip install ruff && claude   # then follow VERIFICATION.md
 ```
 
+The answer key ([RUNBOOK.md](RUNBOOK.md)) lives at the repo root, outside `plants/`, so it never travels into the run directory — a reviewer that can read the expected answers isn't being tested. Plant 1 is the one exception to "run from the lab": it runs from an **empty** directory (see its amendment in [VERIFICATION.md](VERIFICATION.md)).
+
 **Why the isolated folder is not optional.** The reviewer resolves plan/doc paths against the working directory. Launch from a shared root and it will pick up stray planning files left there by *other* projects — reviewing a plan you never meant to test. That's a plant that passes or fails for the wrong reason and can't be reproduced. A folder holding nothing but the plant kit makes every prompt in [VERIFICATION.md](VERIFICATION.md) resolve to exactly the file it names, every time. Copy **only** `plants/` here; the agents and doctrine already live in `~/.claude` (above).
 
 ## ✅ Verify before you trust
@@ -94,11 +96,11 @@ Run the six plants per [VERIFICATION.md](VERIFICATION.md) — exact prompts, in 
 
 > **Editing the doctrine or either agent requires re-running the affected plants before the edit counts as done.**
 
-The edit → re-plant map is at the bottom of [VERIFICATION.md](VERIFICATION.md) and [plants/RUNBOOK.md](plants/RUNBOOK.md). An unverified edit silently un-verifies the whole toolkit — the "verified" label belongs to a version, not a name.
+The edit → re-plant map is at the bottom of [VERIFICATION.md](VERIFICATION.md) and [RUNBOOK.md](RUNBOOK.md). An unverified edit silently un-verifies the whole toolkit — the "verified" label belongs to a version, not a name.
 
 ## ⚠️ Known limitations (disclosed on purpose)
 
-- ~~**Layer 1 is Python-hardcoded.**~~ **Closed 2026-07-23.** Layer 1 now discovers the project's own gates from its manifests (CLAUDE.md / pyproject / package.json / Makefile) and runs the declared checker — no assumed tool. Per change control this edit (plus new doctrine sections) owes re-runs of plants **3, 4, 5** — the badge above stays orange until they're logged in [VERIFICATION.md](VERIFICATION.md).
+- ~~**Layer 1 is Python-hardcoded.**~~ **Closed 2026-07-23.** Layer 1 now discovers the project's own gates from its manifests (CLAUDE.md / pyproject / package.json / Makefile) and runs the declared checker — no assumed tool. Per change control this edit (plus new doctrine sections) owed re-runs of plants **3, 4, 5** — logged 2026-07-23 in [VERIFICATION.md](VERIFICATION.md) as a supplementary row (hardened variants, subagent contexts, agent-run; conditions marked in the log). The badge above asserts "run, logged, conditions disclosed" — the results log is the full story it links to.
 - **Doctrine defaults vs your project's rules.** The seven architecture rules are defaults. Both agents read your project's own docs and stated rules first; the doctrine fills gaps, it doesn't override. A project with no stated rules is itself a flagged finding, not a license to assume.
 
 ## 💡 Design decisions worth stealing

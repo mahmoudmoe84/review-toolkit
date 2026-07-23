@@ -44,7 +44,9 @@ producing a green table you can't trust.
 (Agents come from `~/.claude` regardless of cwd; plant files come from cwd.
 Those are two different discovery mechanisms — don't conflate them. Copy ONLY
 `plants/` into the lab folder; the agents, doctrine, README, and this file stay
-where they are.)
+where they are. The answer key — `RUNBOOK.md` — lives at the repo root, outside
+`plants/`, precisely so it never travels into the run directory: a reviewer
+that can read the expected answers isn't being tested.)
 
 **Ground rules for every plant:**
 - Fresh Claude Code session per plant. Fresh context is the mechanism —
@@ -59,7 +61,18 @@ where they are.)
 
 ## Plant 1 — input guard
 
-**Setup:** none.
+**Setup (amended 2026-07-20): run this plant from an EMPTY directory outside
+`~/.claude`** — e.g. `mkdir ~/Desktop/empty-room && cd ~/Desktop/empty-room` —
+NOT from the plant-lab. This plant is the one exception to "run from the lab":
+on a bare invocation the harness goes hunting for a plan on its own, scavenging
+the working directory **and** its saved-plans store. Launched from the lab, the
+kit's own `variants/*.md` become candidate plans; launched from `~/.claude`,
+stray stored plans get pulled in. Either way the reviewer ends up holding a
+plan you never supplied and the input guard is never actually exercised.
+**Any permission prompt to read a plan file during this plant is the
+contamination signal: answer No, abort the run, and start over from a clean
+room.** (Learned on the 2026-07-20 maiden run — four attempts launched from
+`~/.claude/plants` were contaminated this way before a clean run passed.)
 
 **Prompt (fresh session):**
 ```
@@ -220,8 +233,8 @@ or any file edited.
 project's own gates from CLAUDE.md / pyproject / package.json / Makefile and
 runs the declared checker. On this bait project, discovery resolves to ruff via
 `[tool.ruff]` in pyproject.toml, so the expectations above are unchanged. The
-edit owes a Plant 5 re-run per CHANGE CONTROL; verified status holds only once
-it is logged.
+edit owed a Plant 5 re-run per CHANGE CONTROL — logged 2026-07-23 in the
+results log below (supplementary hardened row; conditions marked).
 
 ---
 
@@ -266,20 +279,30 @@ see it (or when you catch its absence).
 
 ---
 
-## Results log (copy per run)
+## Results log
+
+### v2 kit — maiden stock runs
 
 | Plant | Date | Model | PASS/FAIL | Why it passed (mechanism, not vibes) |
 |-------|------|-------|-----------|--------------------------------------|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
-| 6 | | | | |
+| 1 | 2026-07-20 | claude-opus-4-8 | PASS | Refused to review; named all three missing inputs (no plan, no design doc, no decisions/notes) and explicitly declined to self-select a candidate plan, noting that a self-selected plan defeats the mechanism. Four earlier same-day attempts launched from `~/.claude/plants` were contaminated by the harness scavenging cwd + its saved-plans store — the origin of the Plant 1 empty-room amendment above. |
+| 2 | 2026-07-20 | claude-opus-4-8 | PASS | BLOCKING fake-citation finding: plan step 3 rests on "decision 6" while DECISIONS.md ends at 5. Bonus: also flagged the DESIGN §5 out-of-scope conflict and the §4 validation-choke-point bypass. |
+| 3 | 2026-07-20 | claude-opus-4-8 | PASS | Halted BLOCKING on decision 6 (flat JSON) vs DESIGN §3 (SQLite as the doc's source of truth), quoting both sides; also caught the internal decision 1 vs 6 contradiction; graded zero steps; left resolution to the human. Condition noted: the reviewer subagent ran with a fresh context, but its parent session was shared with Plant 2's run (deviation from the fresh-session-per-plant convention, recorded rather than hidden). |
+| 4 | 2026-07-20 | claude-opus-4-8 | PASS | BLOCKING citing DESIGN §4; remedy placed in `application/` (`add_bookmark` calls `validate()` before touching `Repo`); additionally flagged that no test goes red if the gate is deleted. SIMPLER? answered honestly: "Nothing — already at the simplicity the problem needs." |
+| 5 | — | — | — | No stock v2 run yet. Post-edit verification covered by the supplementary hardened row below, with conditions marked. |
+| 6 | — | — | — | No stock v2 run yet; not owed by the 2026-07-23 edits (doctrine load path unchanged). The v1 kit's Plant 6 passed on 2026-07-19. |
+
+### Supplementary — re-runs owed by the 2026-07-23 edits (linter-agnostic Layer 1 + new doctrine sections)
+
+| Plants | Date | Model | PASS/FAIL | Conditions and why it passed |
+|--------|------|-------|-----------|------------------------------|
+| 3, 4, 5 | 2026-07-23 | claude-opus-4-8 | PASS (3/3) | **Marked run: hardened-variant · subagent-context · agent-run.** Deliberately nastier variants of the stock bait, executed by an agent (not a human at fresh interactive sessions) in fresh subagent contexts, from an isolated scratchpad lab, against the installed `~/.claude` agents + doctrine at commit `a037432`. Plant 3: BLOCKING halt on a contradiction buried at decision 7 of 8; rejected the plan's "note to reviewer" self-certification bait; caught the bonus internal contradiction. Plant 4: BLOCKING on the missing `validate()` gate citing DESIGN §4; rejected the argparse bait and the storage-side length-cap relocation; SIMPLER? named a genuinely planted redundant cut instead of inventing one. Plant 5: all four planted flaws, each in its correct layer; ruff execution verified from the Bash transcript and cache mtime, not from the report's claim; agents stayed read-only. Logged as supplementary evidence with conditions stated — not a substitute for stock runs. |
 
 One sample per plant at default temperature is **evidence, not proof** — a
 borderline plant can flip between runs. Treat a full green table as "verified
 under these conditions, on this date, with this model," and record all three.
+That is what the README badge asserts: not "flawless", but "run, logged, and
+conditions disclosed" — this table is the full story the badge links to.
 
 ## Edit → re-plant map
 

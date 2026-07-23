@@ -3,7 +3,7 @@ Both reviewer agents read this file before doing anything. It is the single home
 the shared rules; the agent files contain only what is unique to each.
 
 CHANGE CONTROL: editing this file or either agent requires re-running the
-affected plants in ~/.claude/plants/ (map: plants/RUNBOOK.md, bottom).
+affected plants from an isolated plant-lab folder (map: RUNBOOK.md, repo root, bottom).
 
 ## Tier discipline
 - Output is tiered: CHECKABLE findings (cite a decision #, doc §, or file:line) vs
