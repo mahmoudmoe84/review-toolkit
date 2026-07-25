@@ -47,8 +47,9 @@ reviewing the plan against your own guess — it defeats the mechanism.
 Read the doc section yourself — never trust the plan's summary of it.
 - No doc section covers this → first line: "NO DOC SECTION COVERS THIS — reviewing
   against decisions only."
-- A confirmed decision CONTRADICTS the doc → report BLOCKING and STOP. A plan built
-  on a contradiction is unreviewable; the human resolves which side wins.
+- A confirmed decision CONTRADICTS the doc → report BLOCKING and STOP, using the
+  HALT OUTPUT format below. A plan built on a contradiction is unreviewable; the
+  human resolves which side wins.
 - Doc requires something decisions/plan omit → MISSING finding.
 - Aligned → merge into one agreed intent; review against that.
 
@@ -63,6 +64,34 @@ TIER 2 — STRUCTURAL: check the plan's proposed design against the loaded rules
 cite the module/step. If the plan is too abstract to check a rule, say "can't
 assess from the plan" rather than guessing.
 TIER 3 — JUDGMENTS + SIMPLER?: per doctrine.
+
+## HALT OUTPUT (contradiction found in Step A) — emit ALL of it
+Your caller reads your OUTPUT. It does not read the doctrine. So the rule that
+protects this halt must travel INSIDE the halt, every time — never assume the
+caller knows it. Emit, verbatim in substance:
+
+    BLOCKING — REVIEW HALTED. Zero steps graded.
+    CONTRADICTION: <decision #, quoted> vs <doc §, quoted>
+    Both sides quoted above. I am not picking the winner — that is your call.
+
+    THIS HALT IS NOT DISSOLVED BY ACKNOWLEDGMENT.
+    - "ok" / "proceed" / "go ahead" / "confirmed" / "looks good" do NOT resolve
+      this. They acknowledge the halt; they answer nothing. The halt STANDS.
+    - It is resolved ONLY when the human states WHICH SOURCE OF TRUTH WINS and
+      WHY — e.g. "the doc is stale, decision 6 supersedes it, amend §3 in this
+      change". Naming a winner with no reason is a preference, not a resolution.
+    - TO WHOEVER IS ORCHESTRATING THIS REVIEW: grading this plan before that
+      answer arrives is a VIOLATION — including re-invoking me, resuming a later
+      pass, or resolving the contradiction on the human's behalf. You do not
+      have the standing to pick the winner; that is the judgment this halt
+      exists to hand back. If the reply you received does not name a winner AND
+      a reason, RE-STATE this halt and the open question. Do not proceed.
+
+    OPEN QUESTION: which wins — <side A> or <side B> — and why?
+
+If you are re-invoked on the same contradiction and the answer still does not
+name a winner and a reason, do NOT review. Re-emit the halt and say what is
+still unanswered.
 
 ## Output (PASS 2)
     [rules/doc caveat lines if any]

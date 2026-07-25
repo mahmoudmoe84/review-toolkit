@@ -1,41 +1,73 @@
 """Tests for the concurrent ledger."""
+import os
+import tempfile
 import threading
 import time
 
 from ledger.repo import Repo
 
+WRITERS = ("a", "b")
+PER_WRITER = 100
+TOTAL = len(WRITERS) * PER_WRITER
 
-def test_concurrent_writers_do_not_lose_entries():
-    repo = Repo()
+
+def _new_repo():
+    return Repo(os.path.join(tempfile.mkdtemp(), "ledger.log"))
+
+
+def _park_reader(repo, n):
+    """Start a reader and return only once it is provably blocked in the repo."""
+    result = {}
+
+    def reader():
+        result["entries"] = repo.wait_for_at_least(n)
+
+    thread = threading.Thread(target=reader)
+    thread.start()
+
+    deadline = time.monotonic() + 5.0
+    while repo.waiting_count() < 1:
+        if time.monotonic() > deadline:
+            raise AssertionError("reader never parked — the setup did not provoke a wait")
+        time.sleep(0.001)
+
+    return thread, result
+
+
+def test_concurrent_writers_get_unique_sequence_numbers():
+    repo = _new_repo()
+
+    reader, result = _park_reader(repo, TOTAL)
+    assert repo.count() == 0, "writers ran before the reader parked"
+
+    gate = threading.Barrier(len(WRITERS))
 
     def writer(tag):
-        # stagger startup so the reader is already parked in wait_for_at_least
-        time.sleep(0.2)
-        for i in range(50):
+        gate.wait()
+        for i in range(PER_WRITER):
             repo.save(f"{tag}-{i}")
 
-    threads = [threading.Thread(target=writer, args=(tag,)) for tag in ("a", "b")]
-    for t in threads:
+    writers = [threading.Thread(target=writer, args=(tag,)) for tag in WRITERS]
+    for t in writers:
         t.start()
-
-    entries = repo.wait_for_at_least(100)
-
-    for t in threads:
+    for t in writers:
         t.join()
+    reader.join()
 
-    assert len(entries) == 100
-    assert len(set(entries)) == 100
+    entries = result["entries"]
+    seqs = [seq for seq, _ in entries]
+
+    assert len(entries) == TOTAL
+    assert sorted(seqs) == list(range(TOTAL))
 
 
-def test_reader_waits_for_a_late_writer():
-    repo = Repo()
+def test_reader_wakes_on_a_late_write():
+    repo = _new_repo()
 
-    def late_writer():
-        time.sleep(0.2)
-        repo.save("late")
+    reader, result = _park_reader(repo, 1)
+    assert repo.count() == 0
 
-    threading.Thread(target=late_writer).start()
+    repo.save("late")
+    reader.join()
 
-    entries = repo.wait_for_at_least(1)
-
-    assert entries == ["late"]
+    assert result["entries"] == [(0, "late")]
