@@ -47,6 +47,12 @@ Used ONLY when the project states none (see each agent's rules-loading step):
 - Participation is asserted, not assumed. If a collaborator is claimed to be
   exercised (mock called, handler invoked, path taken), the test must assert that
   it was; "it probably ran" is not coverage.
+- A mutation that HANGS is not a red test. When a test's subject is a lock, a
+  timeout, or any concurrency primitive, removing it usually produces blocking,
+  not a failed assertion: the run stalls until CI's global timeout kills the job
+  and reports "timed out" instead of naming the mechanism. Such a test needs an
+  explicit deadline around its concurrent section (e.g. a wait_for wrapper), or
+  it cannot go red at all — only stuck.
 
 ## Plan review: chunking and evidence
 - A plan step whose core-path diff would exceed ~200–300 changed lines is
