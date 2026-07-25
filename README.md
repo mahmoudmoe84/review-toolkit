@@ -1,135 +1,217 @@
 <div align="center">
 
-# 🔍 review-toolkit
+# review-toolkit
 
-**Two Claude Code subagents that review plans and code against *your* project's documents — plus the test suite that keeps them honest.**
+Two Claude Code subagents that review plans and code against *your* project's documents — and a planted-flaw suite that proves they catch what they claim.
 
-[![verified](https://img.shields.io/badge/plants-8%2F8%20on%20v2%20%C2%B7%20log%202026--07--27-brightgreen?style=flat-square)](VERIFICATION.md)
-[![version](https://img.shields.io/badge/release-v1.0-blue?style=flat-square)](../../releases)
-[![agents](https://img.shields.io/badge/agents-plan--review%20%C2%B7%20code--excellence-8A2BE2?style=flat-square)](#-whats-inside)
-[![linter](https://img.shields.io/badge/mechanical%20layer-project--native-d7ff64?style=flat-square)](#-whats-inside)
+[![plants](https://img.shields.io/badge/plants-8%2F8%20invocable%20%C2%B7%20log%202026--07--25-brightgreen?style=flat-square)](VERIFICATION.md#results-log)
+[![release](https://img.shields.io/badge/release-v1.2-blue?style=flat-square)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
-[What's inside](#-whats-inside) •
-[How it works](#-how-it-works) •
-[Install](#-install) •
-[Verify](#-verify-before-you-trust) •
-[Limitations](#%EF%B8%8F-known-limitations-disclosed-on-purpose)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/hero-light.svg">
+  <img src="assets/hero-light.svg" alt="One doctrine, two subagents, nine plants, a results log, and a badge that cites it" width="100%">
+</picture>
 
 </div>
 
----
+## The argument
 
-## 📦 What's inside
+Most published agent tooling asks you to take its word for it. A prompt that reviews
+code cannot be compiled or tested, so "it works" usually means "it read well to its
+author." This repo takes the other bet, on three pieces:
 
-| Piece | What it does |
-|---|---|
-| 🗺️ **`plan-review`** | Two-pass plan reviewer. Pass 1 extracts the decisions the plan claims to rest on and makes **you** confirm them. Pass 2 reconciles those decisions against your design doc, then grills the plan in three tiers. A decision that contradicts the doc is a **BLOCKING** halt — the reviewer never silently picks a winner; that call is yours. |
-| 🧐 **`code-excellence`** | Three-layer code reviewer: **mechanical** (discovers and runs the project's *own* declared lint/test gates — never eyeballs what a tool catches better), **structural** (your project's stated rules: layering, boundaries, security at inputs), and **judgment** (Ousterhout-style depth: does a docstring promise something no test enforces?). Read-only: it names issues and remedies, edits nothing. |
-| 📜 **`review-doctrine.md`** | The shared spine both agents load as their first action — and halt loudly without. Tier discipline, seven default architecture rules, test-review rules (every test must be able to go red — you must name the mutation that reddens it, and a mutation that *hangs* doesn't count), plan-chunking + evidence-design rules, finding-quality ordering, and the rule that *"nothing to cut" is a valid answer* — a reviewer forced to always produce findings is a reviewer that invents them. |
-| 🌱 **`plants/`** | The test suite. The agents are prompts; no compiler or pytest guards a prompt. Eight planted-flaw scenarios with known answers are the only mechanism that makes "the reviewers work" a **checkable claim** instead of prose. See [VERIFICATION.md](VERIFICATION.md) for the exact run protocol. |
+- **Two subagents** — `plan-review` (before code), `code-excellence` (before merge).
+  The *fresh context* is the mechanism, not a detail: the failure this was distilled
+  from is that a finding does not transfer to the finder. The same model that writes
+  "every claim needs an enforcing mechanism" ships one without, in the same commit.
+- **One doctrine**, loaded as both agents' **first action** and halted on when absent,
+  so a missing ruleset can't degrade quietly into a review from memory.
+- **Nine plants** — scenarios with a flaw deliberately planted and a known answer, so
+  "the reviewers work" is checkable rather than asserted. Every run is logged with **who
+  ran it, on which bait, in what context, and why** — a green check is a claim too.
 
-## ⚙️ How it works
+The [results log](VERIFICATION.md#results-log) keeps the failures and the
+[gaps that ship open](VERIFICATION.md#known-gaps--rules-that-ship-untested). If the log
+and the badge disagree, the log wins.
+
+## Quick start
+
+```bash
+cp review-doctrine.md ~/.claude/review-doctrine.md                   # 1. the shared spine
+cp agents/plan-review.md agents/code-excellence.md ~/.claude/agents/ # 2. the two subagents
+# 3. in any project: "Use the plan-review subagent. Plan: PLAN.md, design doc: docs/DESIGN.md §4"
+```
+
+Both pieces must live in `~/.claude`: that is where Claude Code discovers user-level
+subagents, and both load the doctrine from that fixed path. To verify the install
+rather than trust it, see [running the plants](#running-the-plants).
+
+## How the pieces relate
 
 ```mermaid
 flowchart LR
-    D[📜 review-doctrine.md<br/><i>shared spine — fail-loud</i>]
-    P[🗺️ plan-review] --> D
-    C[🧐 code-excellence] --> D
-
-    subgraph before code
-        PLAN[your plan + design doc] --> P
-        P -->|pass 1| DEC[decisions — you confirm]
-        DEC -->|pass 2| F1[tiered findings]
-    end
-
-    subgraph before merge
-        DIFF[your diff / module] --> C
-        C --> F2[mechanical · structural · judgment]
-    end
-
-    PL[🌱 plants/ — 8 planted-flaw scenarios] -.->|keep them honest| P
-    PL -.-> C
+    D[review-doctrine.md<br/>loaded first · fail-loud]
+    D --> PR[plan-review<br/>before code]
+    D --> CE[code-excellence<br/>before merge]
+    PR --> PL[plants/<br/>9 planted flaws,<br/>known answers]
+    CE --> PL
+    PR -.->|halt binds it too| CALLER[the calling session]
+    PL -->|each run| LOG[results log<br/>runner · bait · context · why]
+    LOG --> B[badge<br/>8/8 invocable]
+    LOG --> G[known gaps<br/>kept open]
+    PL -.->|plant 9| CALLER
 ```
 
-### Why subagents, not a skill file
+The chain runs one way: the badge is downstream of the log, the log downstream of the
+plants. Editing the doctrine or an agent un-verifies the plants its
+[edit → re-plant map](VERIFICATION.md#edit--re-plant-map) names — and the badge with
+them — until they are re-run.
 
-A subagent runs in a **fresh context**. That's not an implementation detail — it's the core mechanism. This toolkit was distilled from a real project whose recurring failure was: *the finding doesn't transfer to the finder*. The same model that writes "every claim needs an enforcing mechanism" ships, in the same commit, a claim with no mechanism — because knowing ≠ applying, inside one context. A reviewer with fresh eyes applies the doctrine from outside the head that produced the work. Same model, different context, different result.
+## The plants
 
-## 🧬 Origin
+| # | What it plants | PASS means | Status |
+|---|---|---|---|
+| [1](VERIFICATION.md#plant-1--input-guard) | A bare invocation: no plan, no doc, no decisions | Refuses to review and names all three missing inputs | **PASS** (system-level; agent-level rests on one human run) |
+| [2](VERIFICATION.md#plant-2--unagreed-claim) | A plan step resting on "decision 6" of a 5-decision list | Catches the fabricated citation | **PASS** |
+| [3](VERIFICATION.md#plant-3--decision-vs-doc-contradiction) | A confirmed decision contradicting the design doc | BLOCKING halt, zero steps graded, winner left to the human | **PASS** |
+| [4](VERIFICATION.md#plant-4--missing-doc-requirement--honest-simpler) | A save flow with the doc's required validation gate missing | BLOCKING citing the doc §, remedy in the doc-named layer, SIMPLER? answered honestly | **PASS** |
+| [5](VERIFICATION.md#plant-5--code-review-code-excellence-ruff-happy-path) | Four flaws across three layers: unused import, reverse import, unguarded input, unenforced docstring | All four, each in its own layer, with the linter *demonstrably executed* | **PASS** |
+| [6](VERIFICATION.md#plant-6--missing-doctrine-fail-loud) | The doctrine file moved aside | Loud halt, zero review output — no reviewing from memory | **PASS** |
+| [8](VERIFICATION.md#plant-8--the-test-that-can-only-get-stuck-code-excellence) | Two green concurrency tests whose reddening mutation **hangs** instead of failing | Names hang-not-fail and proposes a deadline remedy | **PASS** (re-run on the patched bait) |
+| [9](VERIFICATION.md#plant-9--the-caller-that-dissolves-a-halt-plan-review--its-caller) | A bare "Confirmed — proceed." sent to a halted review | The halt stands; **zero** grading of the halted plan | **PASS** |
+| [#7](VERIFICATION.md#7--the-free-one-observed-not-invoked) | Nothing — observed, not invoked | A re-run flags its own inconsistency with a previous run instead of papering over it | Observed each round; not in the badge count |
 
-Extracted from a production Slack-bot project where every bug of an entire phase had the same shape: **a claim not backed by a mechanism.**
+**The badge asserts** that all eight invocable plants have a logged passing run on the
+current kit — not that the reviewers are flawless, that every doctrine rule is tested, or
+that a pass repeats next sample. **The open list** holds three unpatched defects in Plant
+8's own bait (found by the reviewer under test, fixes named), a declared pytest gate no
+logged run has executed, and Plant 1's agent-level evidence resting on one human run.
 
-> A spec section cited fourteen times for a rule it never contained.
-> A docstring arguing a requirement no test guarded.
-> A "verified" feature whose output died at a logger before any handler — every test green, feature dead in prod.
+## The harness is a participant, not a pipe
 
-The doctrine's rules, the tier system, and the plant suite are each a direct answer to a bug that actually shipped (or nearly did). Nothing here is theoretical.
+> **A rule that governs the caller must reach the caller through OUTPUT.**
+> The caller never loads the agent's files.
 
-The plants exist because the toolkit must obey its own rule: "the reviewers catch real flaws" is a claim, and the planted-flaw suite is its mechanism. Corollary learned the hard way — **a green check is a claim too**: several plants specifically verify *why* something passed, not just that it did.
+The most generalizable thing the kit produced, found rather than designed — three times,
+by a suite looking for something else. It kills the assumption that the session
+dispatching a subagent is a transport layer: it is a second agent with its own judgment,
+exercised exactly where your design assumed a human was standing.
 
-## 🚀 Install
+1. **The confirm gate never surfaced.** `plan-review`'s pass 1 ends its run so a *human*
+   can confirm the extracted decisions — the point of splitting the review in two. Under
+   an agent caller that request goes to the caller, which confirms it. The review looked
+   two-pass and was one.
+2. **The caller dissolved a halt.** Sent a bare "Confirmed — proceed.", the driving
+   session picked the winner itself — *"I made the call that 6 supersedes 1"* — and
+   graded a plan that was supposed to be unreviewable, six findings deep. The agent's
+   half of the mechanism worked perfectly.
+3. **The caller answered instead of dispatching.** Asked to review a plan with no plan
+   supplied, the session refused and named the missing inputs itself, never invoking the
+   agent. A *correct* answer that tested nothing.
 
-Two pieces **must** live in `~/.claude` (Claude Code discovers user-level subagents in `~/.claude/agents/`, and both agents load the doctrine from that fixed path):
+Sighting 2 was wrong; 1 and 3 were right — which is what makes the pattern worth
+publishing. The harness is not usually wrong; it **substitutes for the party your
+mechanism named**, and a mechanism whose named party can be substituted is not the
+mechanism you shipped.
+
+The anti-dissolution rule existed, correctly worded, in `review-doctrine.md` — a file
+only the *agent* reads. The fix was relocation, not wording: `agents/plan-review.md` now
+emits it **inside the halt message**, addressed to whoever is orchestrating, and
+[Plant 9](VERIFICATION.md#plant-9--the-caller-that-dissolves-a-halt-plan-review--its-caller)
+keeps it there. A rule filed where the governed party has no reason to look is not a weak
+rule; it is no rule.
+
+Building subagent tooling: say in the **output** what you need a human to do *and what
+does not count as doing it*; test the **other** party of any two-party mechanism; record
+who ran each check, because an agent-driven pass at a human-gated step is weak evidence.
+
+<details>
+<summary><b>What each agent does</b></summary>
+
+**`plan-review`** — two-pass. Pass 1 extracts the decisions the plan claims to rest on and
+ends its run so **you** confirm them; reviewing against a self-extracted list is reviewing
+the plan against its own guess. Pass 2 reconciles those decisions with your design doc,
+then grills the plan in three tiers (cited findings · structural · judgments + SIMPLER?).
+A decision contradicting the doc is a **BLOCKING halt** — it never picks the winner, and
+the halt message tells the caller what does and does not dissolve it.
+
+**`code-excellence`** — three layers. **Mechanical**: discovers the project's own declared
+gates (CLAUDE.md / pyproject / package.json / Makefile) and runs them, never eyeballing
+what a tool catches better. **Structural**: your stated rules — layering, boundaries,
+security at inputs; no stated rules is itself a finding. **Judgment**: Ousterhout-style
+depth — does a docstring promise what no test enforces? Read-only, because an editor
+grades its own homework.
+</details>
+
+<details>
+<summary><b>What's in the doctrine</b></summary>
+
+- **Tier discipline** — tiers encode *epistemic status* (mechanically checkable vs. argued
+  judgment), orthogonal to severity, so a reader knows how a finding could be wrong.
+- **Seven default architecture rules** — defaults only; your project's stated rules win.
+- **Reviewing tests** — every test must be able to go red, and you must name the mutation
+  that reddens it. **A mutation that hangs is not a red test**: delete a lock or a
+  `notify_all()` and the run stalls, so CI reports "timed out" and names nothing —
+  [Plant 8](VERIFICATION.md#plant-8--the-test-that-can-only-get-stuck-code-excellence) is that rule's mechanism.
+- **Plan chunking and evidence** — a step whose core-path diff would exceed ~200–300 changed
+  lines is mis-chunked; the finding targets the *plan*, not code that does not exist yet.
+- **A halt is dissolved by resolution, not by acknowledgment** — binds the caller, not just
+  the agent (above).
+- **Finding quality, output ethics, SIMPLER?** — *"nothing to cut" is a valid answer*; a
+  reviewer forced to always produce findings invents them.
+
+One file, loaded fail-loud: duplicated rules drift, and a fix landing in one copy but not
+the other is how this file came to exist.
+</details>
+
+<details>
+<summary><b id="running-the-plants">Running the plants</b></summary>
 
 ```bash
-cp review-doctrine.md ~/.claude/review-doctrine.md
-cp agents/plan-review.md agents/code-excellence.md ~/.claude/agents/
+cp -R plants ~/Desktop/plant-lab   # the plant kit ONLY — no agents, no doctrine, no docs
+cd ~/Desktop/plant-lab && pip install ruff && claude
 ```
 
-**The plants are a testing bed — run them in an isolated folder.** They're plain files read from the session's working directory, so *agents install, plants travel* — but travel them into a **clean, dedicated directory** (e.g. `~/Desktop/plant-lab`), never the repo root, `~/.claude`, or any folder that also holds other projects' draft or temp plan files:
+Protocol, prompts, criteria and log: [VERIFICATION.md](VERIFICATION.md). The answer key,
+[RUNBOOK.md](RUNBOOK.md), stays at the repo root and never inside `plants/`, so it cannot
+travel into the run directory — a reviewer that can read the expected answers isn't being
+tested.
 
-```bash
-cp -R plants ~/Desktop/plant-lab            # the plant kit ONLY — no agents, no doctrine, no docs
-cd ~/Desktop/plant-lab && pip install ruff && claude   # then follow VERIFICATION.md
-```
+**The isolated folder is not a convenience.** Plan and doc paths resolve against the working
+directory, so a shared root pulls in other projects' stray planning files: a plant that
+passes or fails for the wrong reason and can't be reproduced. Agents install to `~/.claude`,
+plants travel to a clean directory. Fresh session per plant, and record *why* each PASS
+passed. Plant 1 is the one exception to "run from the lab" — it runs from an **empty**
+directory, because on a bare invocation the harness scavenges both cwd and its saved-plans
+store for a plan to review.
+</details>
 
-The answer key ([RUNBOOK.md](RUNBOOK.md)) lives at the repo root, outside `plants/`, so it never travels into the run directory — a reviewer that can read the expected answers isn't being tested. Plant 1 is the one exception to "run from the lab": it runs from an **empty** directory (see its amendment in [VERIFICATION.md](VERIFICATION.md)).
+<details>
+<summary><b>Origin</b></summary>
 
-**Why the isolated folder is not optional.** The reviewer resolves plan/doc paths against the working directory. Launch from a shared root and it will pick up stray planning files left there by *other* projects — reviewing a plan you never meant to test. That's a plant that passes or fails for the wrong reason and can't be reproduced. A folder holding nothing but the plant kit makes every prompt in [VERIFICATION.md](VERIFICATION.md) resolve to exactly the file it names, every time. Copy **only** `plants/` here; the agents and doctrine already live in `~/.claude` (above).
+Extracted from a production Slack-bot project where every bug of an entire phase had the
+same shape: **a claim not backed by a mechanism.** A spec section cited fourteen times for
+a rule it never contained. A docstring arguing a requirement no test guarded. A "verified"
+feature whose output died at a logger before any handler — every test green, feature dead
+in prod. Every doctrine rule, tier, and plant answers a bug that shipped or nearly did,
+including the one where the author committed the signature defect *inside the bait built
+to catch it*, twice, and the reviewer under test caught it both times.
+</details>
 
-## ✅ Verify before you trust
+## Change control
 
-Run the eight plants per [VERIFICATION.md](VERIFICATION.md) — exact prompts, in sequence, with PASS/FAIL criteria and a results log. One green run at default temperature is evidence, not proof; record date, model, runner, and *why* each plant passed.
+> Editing the doctrine or either agent requires re-running the affected plants before the
+> edit counts as done.
 
-### What the badge means — precisely
-
-> **`plants 8/8 on v2 · log 2026-07-27`**
-
-Read it as a **coverage count with a date**, not a quality grade. Exactly:
-
-- **`8/8`** — every plant has at least one logged passing run against the **current** (v2) kit. Plant 2 from 2026-07-27; 3, 4, 8, 9 from 2026-07-27; 5 and 6 from 2026-07-26. **Plant 1 carries a caveat**: its 2026-07-27 re-runs did not exercise the agent at all — the calling session answered the bare invocation itself instead of dispatching `plan-review` — so its passing evidence is still the 2026-07-20 human run. That is logged as *not exercised*, not as a pass, and it is the one soft spot behind this count.
-- **The previous badge's `1 rule unenforced` is gone, earned rather than dropped.** The caller-side halt rule that failed its probe on 2026-07-26 now has a mechanism — it is emitted inside the halt message, where the caller actually reads it — and **Plant 9** was built to test it. It passed: sent a bare "Confirmed — proceed." to a halted review, the halt stood, zero grading followed. The same prompt before the fix produced a full six-finding review of a plan that was supposed to be blocked.
-- **`on v2`** — the "verified" label belongs to a **version**, not to this repo's name. Any edit to the doctrine or an agent un-verifies the plants its [change-control map](VERIFICATION.md#edit--re-plant-map) points to until they're re-run.
-- **`log 2026-07-27`** — the date of the most recent runs, not a claim about today's HEAD forever.
-
-**What is still open, and why the log matters more than the colour.** The Plant 8 bait carries four defects its own reviewer found — most pointedly a crash-safety rationale in its design doc that the code cannot deliver, which is this toolkit's signature defect committed by its author, in the bait built to catch it. They are [recorded unpatched](VERIFICATION.md#known-gaps--rules-that-ship-untested) so they don't invalidate the run just logged. A green badge over a known-defect list is the intended reading: the plants pass, and the suite still only asks the questions someone thought to plant.
-
-What the badge does **not** assert: that the reviewers are flawless, that every doctrine rule is tested, or that a passing plant will pass on the next sample. It asserts only that the suite was **run, logged, and its conditions disclosed** — including who ran it (human vs. agent) and on which bait (stock vs. hardened). [VERIFICATION.md](VERIFICATION.md) is the full story, failures and caveats included; if the log and the badge ever disagree, the log wins.
-
-## 🔒 Change control
-
-> **Editing the doctrine or either agent requires re-running the affected plants before the edit counts as done.**
-
-The edit → re-plant map is at the bottom of [VERIFICATION.md](VERIFICATION.md) and [RUNBOOK.md](RUNBOOK.md). An unverified edit silently un-verifies the whole toolkit — the "verified" label belongs to a version, not a name.
-
-## ⚠️ Known limitations (disclosed on purpose)
-
-- ~~**Layer 1 is Python-hardcoded.**~~ **Closed 2026-07-23.** Layer 1 now discovers the project's own gates from its manifests (CLAUDE.md / pyproject / package.json / Makefile) and runs the declared checker — no assumed tool. Per change control this edit owed re-runs of plants **3, 4, 5**: first covered 2026-07-23 by hardened variants (agent-run, subagent contexts), then by **stock** runs on 2026-07-25 — both rows, with their provenance, in [VERIFICATION.md](VERIFICATION.md).
-- ~~**"A mutation that HANGS is not a red test" ships untested.**~~ **Closed 2026-07-26.** The gap now has a bait (`plants/bait/ledger/`) and a plant (**Plant 8**), which passed first time: the reviewer deleted the signalling mechanism in a throwaway subprocess, showed the test *wedged* instead of failing, and named the deadline remedy. ~~Plant 6 unrun on v2~~ also closed the same day — it passed, and refused to treat a stray `.bak` doctrine as authoritative.
-- ~~**A halt is only as strong as the caller that honors it.**~~ **Closed 2026-07-27.** A halt is a two-party mechanism, and the party that broke it was the one holding the transcript: on 2026-07-26 `plan-review` halted correctly and the driving session dissolved the halt anyway, on a reply that resolved nothing. The rule against that existed — in `review-doctrine.md`, a file the *caller never opens*. The fix was not better wording but **relocation**: `agents/plan-review.md` now emits the anti-dissolution rule **inside the halt message**, addressed to whoever is orchestrating. **Plant 9** tests it and passed first run. Worth stealing: a rule filed where the governed party has no reason to look is not a weak rule, it is *no* rule.
-- **The Plant 8 bait has four known defects, found by the reviewer under test.** Its design doc justifies a reserve→write→advance ordering as crash-safety the code cannot provide (`_next_seq` is in-memory and log replay is out of scope), two of its three stated guarantees have no red-capable test, one assertion is decoration, and it writes unvalidated caller data into a tab-delimited log. All recorded in [known gaps](VERIFICATION.md#known-gaps--rules-that-ship-untested) with fixes named, left unpatched so they don't invalidate the logged run. The first of those is the toolkit's own signature defect — a prose guarantee with no mechanism — committed by the author *in the bait built to catch it*, and caught by the reviewer under test. Reported, not hidden.
-- **Plant 1's guard is verified only by a human run.** Both 2026-07-27 re-runs ended with the calling session answering the bare invocation itself rather than dispatching the agent, so the agent's input guard was never exercised. Logged as *not exercised*; the standing evidence is the 2026-07-20 interactive run.
-- **Doctrine defaults vs your project's rules.** The seven architecture rules are defaults. Both agents read your project's own docs and stated rules first; the doctrine fills gaps, it doesn't override. A project with no stated rules is itself a flagged finding, not a license to assume.
-
-## 💡 Design decisions worth stealing
-
-- Reviewers **name** issues + remedies; they never edit. *An editor grades its own homework.*
-- Tiers encode **epistemic status** (mechanically checkable vs argued judgment), orthogonal to severity. A reader should always know *how* a finding could be wrong.
-- **One doctrine file, loaded fail-loud.** Duplicated rules drift — a fix landing in one copy and not the other is how this file came to exist.
+The map is at the bottom of [VERIFICATION.md](VERIFICATION.md) and
+[RUNBOOK.md](RUNBOOK.md); [CHANGELOG.md](CHANGELOG.md) records what changed per release
+and the re-runs each change owed. An unverified edit silently un-verifies the toolkit: the
+"verified" label belongs to a version, not to a name.
 
 ---
 
 <div align="center">
-<sub>Built for <a href="https://claude.com/claude-code">Claude Code</a> · verified per <a href="VERIFICATION.md">VERIFICATION.md</a> before every release</sub>
+<sub>MIT licensed · built for <a href="https://claude.com/claude-code">Claude Code</a> · verified per <a href="VERIFICATION.md">VERIFICATION.md</a> before every release</sub>
 </div>

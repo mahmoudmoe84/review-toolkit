@@ -11,8 +11,12 @@ PER_WRITER = 100
 TOTAL = len(WRITERS) * PER_WRITER
 
 
+def _new_path():
+    return os.path.join(tempfile.mkdtemp(), "ledger.log")
+
+
 def _new_repo():
-    return Repo(os.path.join(tempfile.mkdtemp(), "ledger.log"))
+    return Repo(_new_path())
 
 
 def _park_reader(repo, n):
@@ -38,7 +42,6 @@ def test_concurrent_writers_get_unique_sequence_numbers():
     repo = _new_repo()
 
     reader, result = _park_reader(repo, TOTAL)
-    assert repo.count() == 0, "writers ran before the reader parked"
 
     gate = threading.Barrier(len(WRITERS))
 
@@ -65,9 +68,47 @@ def test_reader_wakes_on_a_late_write():
     repo = _new_repo()
 
     reader, result = _park_reader(repo, 1)
-    assert repo.count() == 0
 
     repo.save("late")
     reader.join()
 
     assert result["entries"] == [(0, "late")]
+
+
+def test_log_file_holds_one_line_per_entry():
+    """Red if the durable write of DESIGN §4 is dropped — nothing else reads it back."""
+    path = _new_path()
+    repo = Repo(path)
+
+    repo.save("first")
+    repo.save("second")
+    repo.close()
+
+    with open(path) as log:
+        assert log.read().splitlines() == ["0\tfirst", "1\tsecond"]
+
+
+def test_a_returned_list_is_not_mutated_by_a_later_save():
+    """Red if save() appends in place — §4's copy-on-write claim is what allows
+    wait_for_at_least() to hand back its own list uncopied."""
+    repo = _new_repo()
+    repo.save("first")
+
+    held = repo.wait_for_at_least(1)   # already satisfied: returns without blocking
+    repo.save("second")
+
+    assert held == [(0, "first")]
+
+
+def test_save_rejects_the_log_delimiters():
+    """Red if the delimiter guard goes — an entry with a newline forges a record."""
+    repo = _new_repo()
+
+    for bad in ("two\tfields", "two\nlines"):
+        try:
+            repo.save(bad)
+        except ValueError:
+            continue
+        raise AssertionError(f"save() accepted a delimiter: {bad!r}")
+
+    assert repo.count() == 0

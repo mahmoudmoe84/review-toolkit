@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" role="img" aria-label="review-toolkit: one doctrine, two subagents, nine plants, a results log, and a badge that cites it">
+<rect width="1000" height="300" rx="10" fill="#ffffff"/>
+<text x="40" y="42" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" font-weight="600" fill="#1f2328">review-toolkit</text>
+<text x="176" y="42" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#59636e">a claim, its mechanism, its evidence</text>
+<rect x="40" y="70" width="200" height="132" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+<rect x="40" y="70" width="200" height="3" rx="1.5" fill="#8250df"/>
+<text x="56" y="101" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#8250df">review-doctrine.md</text>
+<text x="56" y="126" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">one shared spine</text>
+<text x="56" y="146" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">loaded as first action</text>
+<text x="56" y="166" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">missing → loud halt</text>
+<rect x="270" y="70" width="200" height="132" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+<rect x="270" y="70" width="200" height="3" rx="1.5" fill="#0969da"/>
+<text x="286" y="101" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#0969da">two subagents</text>
+<text x="286" y="126" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">plan-review · before code</text>
+<text x="286" y="146" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">code-excellence · pre-merge</text>
+<text x="286" y="166" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">names issues, never edits</text>
+<rect x="500" y="70" width="200" height="132" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+<rect x="500" y="70" width="200" height="3" rx="1.5" fill="#6e7f16"/>
+<text x="516" y="101" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#6e7f16">9 plants</text>
+<text x="516" y="126" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">planted flaws with</text>
+<text x="516" y="146" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">known answers</text>
+<text x="516" y="166" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">one tests the caller</text>
+<rect x="730" y="70" width="200" height="132" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+<rect x="730" y="70" width="200" height="3" rx="1.5" fill="#1a7f37"/>
+<text x="746" y="101" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#1a7f37">results log</text>
+<text x="746" y="126" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">runner · bait · context</text>
+<text x="746" y="146" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">why each passed</text>
+<text x="746" y="166" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#59636e">gaps left open</text>
+<path d="M243 136 h20" stroke="#8c959f" stroke-width="1.5"/>
+<path d="M259 131 l6 5 -6 5" fill="none" stroke="#8c959f" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M473 136 h20" stroke="#8c959f" stroke-width="1.5"/>
+<path d="M489 131 l6 5 -6 5" fill="none" stroke="#8c959f" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M703 136 h20" stroke="#8c959f" stroke-width="1.5"/>
+<path d="M719 131 l6 5 -6 5" fill="none" stroke="#8c959f" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="40" y="232" width="232" height="30" rx="15" fill="#dafbe1" stroke="#1a7f37"/>
+<text x="60" y="252" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" font-weight="600" fill="#116329">plants 8/8 invocable · logged</text>
+<text x="292" y="247" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#59636e">The badge is a coverage count with a date, not a grade — a green check is a claim too,</text>
+<text x="292" y="264" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#59636e">so every row states who ran it, on which bait, and why it passed.</text>
+</svg>

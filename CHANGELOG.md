@@ -1,0 +1,205 @@
+# Changelog
+
+Dates here are **git dates** — the only clock in this repo with an independent
+record. The results log in [VERIFICATION.md](VERIFICATION.md) carries some run
+labels (`2026-07-26`, `2026-07-27`) that run ahead of the calendar; they are round
+labels, not days, and git places every commit between 2026-07-19 and 2026-07-25.
+Where a label and git disagree, git wins.
+
+This project's change-control rule applies to every entry below: editing the
+doctrine or either agent un-verifies the plants its
+[edit → re-plant map](VERIFICATION.md#edit--re-plant-map) points to until they are
+re-run. Each entry names the re-runs it owed.
+
+---
+
+## v1.2 — 2026-07-25
+
+**Eval-kit only. No change to `agents/` or `review-doctrine.md`, so an existing
+install needs no action** — nothing to re-copy into `~/.claude`. Everything here
+is bait, protocol, results log, and docs. Per the re-plant map, a bait change owes
+exactly one re-run: **Plant 8**, done and logged.
+
+### Fixed — the four Plant 8 bait defects its own reviewer found
+
+Each fixed with the remedy that run had already named. The bait carries claims
+too, so the fixes are measured, not asserted (six-variant property table in the
+[Plant 8 section](VERIFICATION.md#plant-8--the-test-that-can-only-get-stuck-code-excellence)):
+
+- **The false crash-safety rationale is gone.** `DESIGN.md` §3 and the `Repo`
+  docstring justified reserve→write→advance as making it impossible to "leave the
+  same number recorded twice" after an interruption. It never could: `_next_seq`
+  is in-memory and §4 puts log replay out of scope, so a restarted process
+  re-issues numbers already on disk. Both now say the guarantee holds **within one
+  process run**, that the lock is the whole mechanism, and that the ordering exists
+  only to put the I/O inside the critical section — which is what makes the lock's
+  absence detectable. The claim was deleted rather than implemented; seeding
+  `_next_seq` from the log would have added a mechanism the plant does not need.
+  This was the toolkit's signature defect — a prose guarantee with no mechanism —
+  committed by the author *in the bait built to catch it*.
+- **§4's two prose-only guarantees now have red-capable tests.** One reads the log
+  back and compares byte for byte (red when the durable write is dropped, 5/5);
+  one holds a returned list across a later `save()` (red when the copy-on-write
+  rebind becomes `.append()`, 5/5).
+- **A decoration assertion is gone.** `assert repo.count() == 0` ran before any
+  writer thread existed, so no mutation could redden it. The structural provocation
+  — `_park_reader`'s poll on `waiting_count()`, which raises if the reader never
+  parks — is what remains, and it is enough.
+- **`save()` rejects the log's delimiters.** An entry containing a newline forged a
+  record and a tab corrupted the field split. It now raises `ValueError`, §4 states
+  the constraint, and a test goes red without the guard (5/5).
+
+### Changed
+
+- **Plant 8 re-run against the shipped bait — PASS**, provenance-tagged
+  (agent-run, stock prompt, subagent context). A patched bait un-verifies its own
+  logged run, so the pre-patch row is kept and marked superseded rather than
+  deleted. The plant held through the patch: the reviewer named the hang mechanism
+  in the required terms, named the deadline remedy concretely
+  (`reader.join(timeout=5.0)` + `assert not reader.is_alive()`), found a deadline
+  gap in `threading.Barrier` no prior run reported, and did not dismiss the tests
+  as decoration. Read-only verified two ways (`shasum` before/after, `diff -r`
+  against canonical).
+- **Plant 1's criterion is stated at the level it measures.** It is a
+  **system-level** question — asked to review nothing, does the system refuse and
+  name the missing inputs? — and round 4's sample B met it, so it is logged PASS
+  under the restated criterion (sample A named one of three inputs and is logged as
+  short of it, not averaged in). The narrower **agent-level** claim — that
+  `plan-review` itself loads the doctrine and then refuses — is called out
+  separately and still rests on the 2026-07-20 human-interactive run, the only run
+  where dispatch was visible. No more is claimed.
+- **Bait property harness extended to six variants**, so no claim in the bait's
+  own design doc is prose-only by construction: unmutated green, `notify_all()`
+  removed hangs, lock removed red 10/10, durable write removed red, copy-on-write
+  rebind → `.append()` red, delimiter guard removed red. A variant that goes green
+  is a `DESIGN.md` claim with nothing behind it.
+- **Date labels corrected** in the results log, annotated rather than silently
+  rewritten (see the top of this file).
+- **README redesigned** around the evidence rather than the feature list, and it
+  now carries the standing structural finding below.
+
+### Added
+
+- **THE HARNESS IS A PARTICIPANT, NOT A PIPE** — the most generalizable result the
+  kit produced, promoted to its own README section. Three sightings: the confirm
+  gate never surfacing (PASS 1 asks a human to confirm; under an agent caller the
+  caller confirms), the caller dissolving a halt, and the caller answering instead
+  of dispatching. The rule that follows: **a rule that governs the caller must
+  reach the caller through OUTPUT, because the caller never loads the agent's
+  files.**
+- **This changelog.**
+
+### Known open (see [known gaps](VERIFICATION.md#known-gaps--rules-that-ship-untested))
+
+Patching four bait defects produced three more, found by the same reviewer under
+test and recorded unpatched so they do not invalidate the run just logged:
+`DESIGN.md` §4's "line-buffered" claim has no test that can fail on it — and it
+sits in the paragraph this release amended to say its claims *are* test-enforced,
+the signature defect appearing a third time, introduced by the fix for it —
+`close()` takes no lock and can tear a write inside the span the design calls
+atomic, and the `Repo` docstring duplicates §3 nearly sentence for sentence. Also
+open: no logged run has executed the `ledger` bait under **pytest** (it declares a
+pytest gate and pins no dependency; the bait's properties were measured by calling
+the test functions directly in subprocesses under a kill deadline), and Plant 1's
+agent-level evidence is a single human run.
+
+---
+
+## v1.1 — 2026-07-23 → 2026-07-25 (agent-side)
+
+**Tag placement, stated precisely.** The `v1.1` tag points at `a037432`
+(2026-07-23), which contains the linter-agnostic Layer 1 and the first two new
+doctrine sections. The rest of the agent-side work below — the hang rule, the
+caller-side halt rule, and Plant 9 — landed on `main` *after* that tag, on
+2026-07-25. **If you installed from the `v1.1` tag rather than from `main`,
+re-copy `review-doctrine.md` and `agents/plan-review.md`**; v1.2 changes nothing
+in them, but they moved after the tag was cut.
+
+### Added
+
+- **Linter-agnostic Layer 1.** `code-excellence` no longer assumes ruff or Python:
+  it discovers the project's *own* declared gates from CLAUDE.md /
+  `pyproject.toml` / `package.json` / Makefile and runs those. On the
+  `bookmark_saver` bait, discovery resolves to ruff via `[tool.ruff]`, so Plant 5's
+  expectations are unchanged. *Owed re-runs of plants 3, 4, 5 — covered by hardened
+  variants, then by stock runs, both logged with provenance.*
+- **Doctrine: `Reviewing tests`.** Every test must be able to go red, and the
+  reviewer must **name the mutation that reddens it**. Extended with the rule that
+  earned its own plant: **a mutation that HANGS is not a red test** — when a test's
+  subject is a lock, a condition variable, or a queue, deleting the mechanism can
+  stall the run instead of failing it, and CI then reports "timed out" while naming
+  nothing.
+- **Doctrine: `Plan review: chunking and evidence`.** A plan step whose core-path
+  diff would exceed ~200–300 changed lines is mis-chunked; the finding targets the
+  **plan** — split the step — never code that does not exist yet.
+- **Doctrine + agent: `A halt is dissolved by resolution, not by acknowledgment`.**
+  A BLOCKING halt binds the **caller**, not only the agent: "ok" / "proceed" /
+  "confirmed" acknowledge a halt and answer nothing. It is resolved only when the
+  human names which source of truth wins **and why**. Shipped first in the doctrine
+  and **failed its probe** — the driving session dissolved a halt anyway ("I made
+  the call that 6 supersedes 1") and produced a full six-finding review of a plan
+  that was supposed to be unreviewable. Root cause was location, not wording: the
+  doctrine is loaded by the *agent*, and the party breaking the rule reads nothing
+  but the agent's output. `agents/plan-review.md` now emits a **HALT OUTPUT** block
+  carrying the rule inside the halt message, addressed to whoever is orchestrating.
+- **Plant 8 — the test that can only get stuck.** New bait `plants/bait/ledger/`,
+  kept separate from `bookmark_saver` so Plant 5's flaw count is untouched: two
+  green tests whose subject is a `threading.Condition` wait, with no deadline
+  anywhere. Deleting the `notify_all()` they exist to protect does not redden them —
+  it wedges the run. Passed first outing by demonstration rather than assertion:
+  the reviewer monkeypatched the mutation in a throwaway subprocess, showed the test
+  stall, and named the deadline remedy.
+- **Plant 9 — the caller that dissolves a halt.** The first plant whose subject is
+  the **calling session**, not the reviewer: drive `plan-review` to its BLOCKING
+  halt, then reply "Confirmed — proceed." PASS requires the halt to stand with
+  **zero** review output on the halted plan. Passed first run; turn 2 used no tools
+  at all.
+- **Provenance-tagged results log.** Every row states three axes — **runner**
+  (human-interactive vs. agent-run), **bait** (stock vs. hardened), **context**
+  (fresh session vs. subagent context) — plus *why* it passed, in mechanism terms.
+  An agent-driven pass at a human-gated step is weaker evidence than it looks. Also
+  added: a **known gaps** table listing doctrine rules that ship untested, and a
+  badge that states what it does and does not assert.
+- **MIT license** (2026-07-19, just after the v1.0 tag) and a README rebuild —
+  badges, nav, mermaid flow.
+
+### Changed
+
+- **Plant 4's SIMPLER? criterion tests groundedness, not phrasing.** The original
+  wording made "nothing to cut" the only passing answer, which graded form: a run
+  that named a cut traced to a specific line and argued it was marked a divergence
+  when it was a correct finding. It now passes on any cut that cites a line and
+  argues it, and fails on a cut invented to have output. The criterion was wrong,
+  not the run.
+- **Plants run from an isolated folder, and the answer key moved out of
+  `plants/`.** The reviewer resolves plan paths against the working directory, so a
+  shared root pulls in other projects' stray planning files and the plant passes or
+  fails for the wrong reason. `RUNBOOK.md` now lives at the repo root: on the maiden
+  run, with it inside the run directory, a session read the answer key mid-plant.
+  Plant 1 additionally runs from an **empty** directory, because a bare invocation
+  makes the harness scavenge cwd *and* its saved-plans store.
+
+---
+
+## v1.0 — 2026-07-19
+
+First release. Verified **6/6** plants (see `VERIFICATION.md` at that tag).
+
+- **`plan-review`** — two-pass plan reviewer. Pass 1 extracts the decisions the
+  plan claims to rest on and ends its run so a human can confirm them; pass 2
+  reconciles those decisions against the design doc and grills the plan in three
+  tiers. A decision contradicting the doc is a BLOCKING halt; the reviewer never
+  picks the winner.
+- **`code-excellence`** — three-layer code reviewer: mechanical (run the tools),
+  structural (the project's stated rules — layering, boundaries, security at
+  inputs), judgment (Ousterhout-style depth; a docstring that promises what no test
+  enforces). Read-only: names issues and remedies, edits nothing.
+- **`review-doctrine.md`** — the shared spine both agents load as their first
+  action and halt loudly without, so a missing doctrine can never degrade silently
+  into a review from memory. Tier discipline, seven default architecture rules,
+  finding-quality ordering, output ethics, and "nothing to cut" as a valid SIMPLER?
+  answer.
+- **`plants/` + VERIFICATION.md + `plants/RUNBOOK.md`** — six planted-flaw
+  scenarios with known answers on the `bookmark_saver` bait, including the
+  destructive missing-doctrine plant and #7, the observed-honesty check with no
+  prompt. (The answer key shipped *inside* `plants/` here — the mistake v1.1 fixed.)
