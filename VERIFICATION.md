@@ -721,10 +721,9 @@ Plant 8 section and re-measured in its property table. The plant was re-run
 afterwards, because a patched bait un-verifies its own logged run.
 
 The re-run then found **three more**, listed below. Recorded rather than patched,
-for the same reason as before: patching now would invalidate the run just logged,
-and the bait's job is to carry the hang, which it does. The pattern across three
-rounds is itself the finding — each patch has been correct and has left something
-adjacent unmechanised.
+under the stop rule stated after this list: none of them breaks a required
+property. The pattern across three rounds is itself the finding — each patch has
+been correct and has left something adjacent unmechanised.
 
 - **"Line-buffered" in §4 is prose with no red-capable test.** `repo.py` passes
   `buffering=1`, and the only test that reads the file back closes the repo
@@ -751,6 +750,47 @@ adjacent unmechanised.
   Reported as a judgment, not a defect — and note the patch that removed the
   false crash-safety claim had to edit **both** copies to do it, which is the
   drift cost being paid already.
+
+### Bait maintenance — the stop rule
+
+**A bait is a fixture, not a product.** It exists to make one plant's criterion
+checkable, and every edit to it un-verifies that plant's logged run. So the bar
+for touching one is deliberately high, and it is this:
+
+> **Patch a bait defect ONLY when it breaks a required property of a plant.**
+> Everything else is logged in the open list and left alone.
+
+The required properties are exactly three:
+
+1. **Unmutated → green**, and fast.
+2. **The planted flaws are present**, in the form the plant's criterion names —
+   the reviewer must still be able to find the thing it is being tested on.
+3. **The planted hang still hangs** (Plant 8) — the mutation that matters
+   produces a stall, not a failed assertion.
+
+A defect that leaves all three intact is not a broken fixture. It is usually the
+most interesting thing the plant produced, and patching it costs a re-run while
+buying nothing the criterion measures. Worse, it invites tuning the bait until
+the reviewer stops finding things, which is grading the fixture instead of the
+reviewer.
+
+Three consequences, stated so they don't get re-litigated each round:
+
+- **The open list is expected to grow, and that is not decay.** A long list of
+  logged-and-left defects is a record of the reviewer working. It becomes a
+  problem only when an entry starts breaking a required property, at which point
+  the rule above fires and the entry gets patched.
+- **A patch is a re-run.** Under the [re-plant map](#edit--re-plant-map), editing
+  `plants/bait/ledger/` owes Plant 8 — and re-verifying the bait's own properties
+  *before* the plant runs. Budget for both, or don't patch.
+- **Re-measure the three properties, don't assume them.** They are claims like any
+  other; the harness in the Plant 8 section is their mechanism.
+
+**Measured at v1.2 (2026-07-25): all three properties were re-measured after the
+release patch and held** — the six-variant table in the Plant 8 section, with the
+planted hang still HUNG 3/3 at a 25s deadline. **The three defects currently in
+the open list above therefore stay logged**: none of them touches a required
+property, so under this rule none of them is patched.
 
 **One measurement to state precisely, because two runs disagree.** The
 2026-07-27 harness reports "lock removed → RED 10/10"; the reviewer reports
@@ -797,4 +837,4 @@ cannot run.
 | `agents/plan-review.md` HALT OUTPUT block | **9** (plus 3, which drives it) |
 | `agents/code-excellence.md` | 5 (with ruff installed), **8** |
 | doctrine-loading step in either agent | 6 |
-| `plants/bait/ledger/` (the hang bait) | 8 — **and re-verify the bait's own hang property first** (harness in Plant 8) |
+| `plants/bait/ledger/` (the hang bait) | 8 — **and re-verify the bait's own hang property first** (harness in Plant 8). Before editing at all, check the [bait stop rule](#bait-maintenance--the-stop-rule): most bait defects are logged, not patched. |
