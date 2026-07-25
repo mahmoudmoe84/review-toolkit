@@ -4,7 +4,7 @@
 
 **Two Claude Code subagents that review plans and code against *your* project's documents — plus the test suite that keeps them honest.**
 
-[![verified](https://img.shields.io/badge/plants-verified%20%C2%B7%20log%202026--07--23-brightgreen?style=flat-square)](VERIFICATION.md)
+[![verified](https://img.shields.io/badge/plants-5%2F6%20on%20v2%20kit%20%C2%B7%20log%202026--07--25-yellowgreen?style=flat-square)](VERIFICATION.md)
 [![version](https://img.shields.io/badge/release-v1.0-blue?style=flat-square)](../../releases)
 [![agents](https://img.shields.io/badge/agents-plan--review%20%C2%B7%20code--excellence-8A2BE2?style=flat-square)](#-whats-inside)
 [![linter](https://img.shields.io/badge/mechanical%20layer-project--native-d7ff64?style=flat-square)](#-whats-inside)
@@ -90,7 +90,20 @@ The answer key ([RUNBOOK.md](RUNBOOK.md)) lives at the repo root, outside `plant
 
 ## ✅ Verify before you trust
 
-Run the six plants per [VERIFICATION.md](VERIFICATION.md) — exact prompts, in sequence, with PASS/FAIL criteria and a results log. One green run at default temperature is evidence, not proof; record date, model, and *why* each plant passed.
+Run the six plants per [VERIFICATION.md](VERIFICATION.md) — exact prompts, in sequence, with PASS/FAIL criteria and a results log. One green run at default temperature is evidence, not proof; record date, model, runner, and *why* each plant passed.
+
+### What the badge means — precisely
+
+> **`plants 5/6 on v2 kit · log 2026-07-25`**
+
+Read it as a **coverage count with a date**, not a quality grade. Exactly:
+
+- **`5/6`** — five of the six plants have at least one logged passing run against the **current** (v2) kit: plants 1–5. **Plant 6 has not been run on v2** (it passed on the v1 kit, 2026-07-19). The badge counts plants *exercised*, and refuses to round that up.
+- **`on v2 kit`** — the "verified" label belongs to a **version**, not to this repo's name. Any edit to the doctrine or an agent un-verifies the plants its [change-control map](VERIFICATION.md#edit--re-plant-map) points to until they're re-run.
+- **`log 2026-07-25`** — the date of the most recent runs, not a claim about today's HEAD forever.
+- **The colour is deliberately not brightgreen.** One plant unrun on v2, one doctrine rule shipping [untested](VERIFICATION.md#known-gaps--rules-that-ship-untested), and one logged run-to-run divergence (Plant 4's SIMPLER? answer) are three reasons a full green would overstate the evidence.
+
+What the badge does **not** assert: that the reviewers are flawless, that every doctrine rule is tested, or that a passing plant will pass on the next sample. It asserts only that the suite was **run, logged, and its conditions disclosed** — including who ran it (human vs. agent) and on which bait (stock vs. hardened). [VERIFICATION.md](VERIFICATION.md) is the full story, divergences included; if the log and the badge ever disagree, the log wins.
 
 ## 🔒 Change control
 
@@ -100,7 +113,10 @@ The edit → re-plant map is at the bottom of [VERIFICATION.md](VERIFICATION.md)
 
 ## ⚠️ Known limitations (disclosed on purpose)
 
-- ~~**Layer 1 is Python-hardcoded.**~~ **Closed 2026-07-23.** Layer 1 now discovers the project's own gates from its manifests (CLAUDE.md / pyproject / package.json / Makefile) and runs the declared checker — no assumed tool. Per change control this edit (plus new doctrine sections) owed re-runs of plants **3, 4, 5** — logged 2026-07-23 in [VERIFICATION.md](VERIFICATION.md) as a supplementary row (hardened variants, subagent contexts, agent-run; conditions marked in the log). The badge above asserts "run, logged, conditions disclosed" — the results log is the full story it links to.
+- ~~**Layer 1 is Python-hardcoded.**~~ **Closed 2026-07-23.** Layer 1 now discovers the project's own gates from its manifests (CLAUDE.md / pyproject / package.json / Makefile) and runs the declared checker — no assumed tool. Per change control this edit owed re-runs of plants **3, 4, 5**: first covered 2026-07-23 by hardened variants (agent-run, subagent contexts), then by **stock** runs on 2026-07-25 — both rows, with their provenance, in [VERIFICATION.md](VERIFICATION.md).
+- **One doctrine rule ships untested.** *"A mutation that HANGS is not a red test"* (added 2026-07-25) has **no bait exercising it** — no plant contains a concurrency primitive, so nothing checks whether the reviewers actually catch a test that can only get stuck. It is marked UNVERIFIED in [known gaps](VERIFICATION.md#known-gaps--rules-that-ship-untested), together with the bait it would need. By this toolkit's own standard that rule is currently prose, not enforcement — named here rather than left to look guarded.
+- **Plant 6 has not been run on the v2 kit.** It passed on v1 (2026-07-19) and no edit since has touched the doctrine-loading path it tests, so it isn't *owed* — but "not owed" is not "verified," which is why the badge reads 5/6.
+- **A halt is only as strong as the caller that honors it.** Observed 2026-07-25: `plan-review` correctly halted BLOCKING on a decision-vs-doc contradiction, and the *driving session* then took a generic "confirmed, proceed" as licence to resolve the contradiction itself and restart the review. The agent behaved correctly; the orchestration around it did not. No plant currently covers this.
 - **Doctrine defaults vs your project's rules.** The seven architecture rules are defaults. Both agents read your project's own docs and stated rules first; the doctrine fills gaps, it doesn't override. A project with no stated rules is itself a flagged finding, not a license to assume.
 
 ## 💡 Design decisions worth stealing
