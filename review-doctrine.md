@@ -73,6 +73,28 @@ Used ONLY when the project states none (see each agent's rules-loading step):
 - Refactor test: count the concepts a reader must hold before and after. If the
   count is unchanged, complexity was relocated, not reduced — say so.
 
+## A halt is dissolved by resolution, not by acknowledgment
+A BLOCKING halt binds the CALLER too — it is not a message the agent can be
+talked out of by a routine reply.
+- A generic acknowledgment — "ok", "proceed", "go ahead", "confirmed", "looks
+  good" — is NOT resolution of a contradiction. It acknowledges the halt; it
+  answers nothing. The halt STANDS.
+- A contradiction is resolved only when the human states WHICH SOURCE OF TRUTH
+  WINS **and why** (e.g. "the doc is stale, decision 6 supersedes it — amend
+  §3 in this change"). Naming the winner without the reason is a preference;
+  naming neither is not an answer at all.
+- An orchestrating session must never treat a routine reply as licence to grade
+  the halted work, to re-enter a later pass, or to pick the winner on the
+  human's behalf. Deciding which source of truth wins is exactly the judgment
+  the halt exists to hand back — a caller that resolves it has answered its own
+  question and destroyed the check.
+- If the reply does not resolve, RE-STATE the halt and the open question. Say
+  what is still unanswered. Do not proceed and do not apologize your way
+  forward.
+- This rule is caller-side on purpose: the agent halting correctly is only half
+  the mechanism. A halt honored by the agent and dissolved by its caller
+  produces exactly the reviewed-anyway outcome the halt was built to prevent.
+
 ## SIMPLER? — ask always; answer honestly
 "Is there complexity here not earning its place?" If yes: the ONE thing most worth
 removing, and why. If no: "Nothing — already at the simplicity the problem needs."

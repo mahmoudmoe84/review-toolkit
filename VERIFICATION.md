@@ -2,7 +2,7 @@
 
 The two subagents (`plan-review`, `code-excellence`) and the shared doctrine are
 prompts. No compiler or test runner guards them. This protocol is their test
-suite: six planted-flaw scenarios with known answers, plus one observed
+suite: seven planted-flaw scenarios with known answers, plus one observed
 behavior. If you edit the doctrine or either agent, re-run the affected plants
 (map at the end) before the edit counts as done.
 
@@ -182,14 +182,37 @@ anything reaches storage, and names `application/` as its home.
 - The remedy placed in the **right layer**: `validate()` belongs in
   `application/` (the doc-named choke point) — not bolted onto the CLI, not
   pushed into storage.
-- The SIMPLER? question answered **honestly**: the plan is already lean, so the
-  correct answer is "nothing to cut" (or equivalent). "Nothing" is a valid
+- The SIMPLER? question answered **honestly** — see the sharpened criterion
+  below. "Nothing to cut" is a valid answer, but it is not the *only* passing
   answer.
 
-**PASS:** all three of the above.
-**FAIL (two distinct modes):** the missing gate isn't caught, **or** SIMPLER?
-invents a cut just to have output — the forced-reviewer bug this section
-exists to detect.
+**SIMPLER? criterion (sharpened 2026-07-26).** The thing being tested is
+groundedness, not the word "nothing":
+
+- **PASS** — SIMPLER? names **no ungrounded cut**. Either it answers "nothing
+  to cut" (or equivalent), **or** it names a cut that (a) traces to a
+  **specific line of the plan** and (b) is **argued** — why that text earns
+  removal. A grounded cut is a real finding, and refusing to report it just to
+  match an expected phrase would itself be dishonest.
+- **FAIL** — a cut **invented to have output**: no line of the plan cited, or
+  cited but unargued, or a cut that contradicts the reviewer's own reading of
+  the plan (e.g. calling the plan too thin and then trimming it anyway). This
+  is the forced-reviewer bug the section exists to detect.
+
+*Why it changed:* the original wording ("the correct answer is nothing to cut")
+graded the answer's **form**. Both logged stock runs pass under the sharpened
+wording: **2026-07-20** answered "Nothing — already at the simplicity the
+problem needs," and **2026-07-25** named collapsing steps 1-2 — grounded in
+`plan_p4.md:6-7`, where step 2 (`add_bookmark` forwards to `Repo.save`) is a
+pass-through with no behavior, and argued alongside the explicit statement that
+"the plan's problem is thinness, not excess." Under the old wording the second
+run looked like a divergence; it was a correct finding failing a criterion that
+tested phrasing. The criterion was wrong, not the run.
+
+**PASS:** the missing gate caught + remedy in the right layer + SIMPLER?
+passing the criterion above.
+**FAIL:** the missing gate isn't caught, the remedy lands in the wrong layer,
+**or** SIMPLER? names an ungrounded cut.
 
 ---
 
@@ -277,6 +300,72 @@ mv ~/.claude/review-doctrine.md.bak ~/.claude/review-doctrine.md
 
 ---
 
+## Plant 8 — the test that can only get stuck (code-excellence)
+
+Built 2026-07-26 to close the known gap below: the doctrine's "a mutation that
+HANGS is not a red test" rule shipped with no bait exercising it. Bait:
+`bait/ledger/` — separate from `bookmark_saver` on purpose, so Plant 5's flaw
+count is untouched.
+
+**Setup:** none. (Do **not** mutate anything yourself — the reviewer is
+read-only and the plant is about what it *says*, not what it runs.)
+
+**Prompt (fresh session):**
+```
+Use the code-excellence subagent to review the project at bait/ledger/.
+The project's design doc is bait/ledger/docs/DESIGN.md.
+```
+
+**Planted flaw.** `tests/test_repo.py` has two tests whose subject is a
+concurrency primitive — `Repo.wait_for_at_least()`, a `threading.Condition`
+wait. Both tests are **green as written**, assert real behavior, and have **no
+deadline anywhere**: no `wait(timeout=)`, no `join(timeout=)`, no
+`pytest-timeout`, no alarm. The mechanism they exist to protect is the
+`notify_all()` in `Repo.save()`. Deleting it does **not** redden them — the
+reader parks in `wait()` and never returns, so the run blocks until CI's global
+timeout kills the job and reports "timed out" instead of naming the ledger.
+
+**Verified property of the bait** (re-check with the harness in the note below
+if you change it): unmutated → both tests pass in well under a second; with
+`notify_all()` deleted → **hangs indefinitely**, confirmed on 3/3 consecutive
+rounds at a 15s kill deadline. The tests are *not* decoration — they are the
+subtler thing the rule names: tests that can go **stuck** but not **red**.
+
+**Expected output:**
+- The test review reaches the right verdict: these tests **cannot go red** on
+  the mutation that matters. Removing the signalling/locking mechanism produces
+  **blocking, not a failed assertion** — the reviewer must say so in those
+  terms, not merely note "no timeout is set" as a style nit.
+- The **remedy is named**: an explicit deadline bounding the concurrent
+  section — `wait_for_at_least(n, timeout=...)`, a `join(timeout=...)`,
+  `pytest-timeout`, or an equivalent wrapper — so the failure mode becomes a
+  named failure instead of a stall.
+- It does **not** claim the tests are decoration or vacuous. They do assert
+  real behavior; the defect is specifically that their reddening mutation
+  hangs.
+
+**PASS:** the hang-not-fail mechanism is named, **and** a deadline remedy is
+proposed.
+**FAIL — the interesting case, and the reason this plant exists:** the reviewer
+performs the doctrine's "name the mutation that reddens this test" step, offers
+a mutation such as "delete the lock" or "delete `notify_all()`", and pronounces
+the tests sound — never noticing that its own proposed mutation produces a
+**stall, not a red test**. Also FAIL if the tests are graded solely on
+assertion quality with the deadline question never raised.
+
+**Re-checking the bait after editing it** (the bait carries a claim too, so it
+needs its own mechanism): copy `bait/ledger` twice, delete the
+`self._changed.notify_all()` line from one copy, and run both test functions in
+a subprocess with a hard kill deadline. Expected: original passes, mutant is
+killed at the deadline. If the mutant *passes*, the bait is broken — the reader
+is reaching `wait_for_at_least` after the writers already finished, so the
+condition variable is never exercised. That is exactly how the first draft of
+this bait failed on 2026-07-26; the `time.sleep(0.2)` stagger in each writer is
+what makes the reader provably park in `wait()` first, and it must not be
+removed.
+
+---
+
 ## #7 — the free one (observed, not invoked)
 
 Whenever plants are re-run after an edit, the parent session must **flag any
@@ -315,7 +404,12 @@ exists to catch.
 | 3 | 2026-07-25 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | Doctrine loaded as the first action (`~/.claude/review-doctrine.md`), then the three inputs. Halted **BLOCKING at PASS 1** — it never reached the confirmation step, because the contradiction is fatal before decisions can be confirmed. Quoted both sides verbatim (DESIGN §3 "settled decision… the doc's source of truth" vs decision #6 "SQLite dropped"), graded **zero** of the plan's three steps, and handed the resolution back as two named options (withdraw #6, or amend §3/§2 and strike #1) without picking one. Bonus: caught the internal #1-vs-#6 contradiction, **and** that #6's stated rationale ("remove the sqlite3 dependency") rests on a false premise — `sqlite3` is stdlib, so there is no dependency to remove. See the run-condition note below: turn 2 of this run is not part of the verdict. |
 | 4 | 2026-07-25 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** (one divergence logged) | BLOCKING #1 is the missing gate, citing `DESIGN.md:21-28` (§4) with the rule quoted (scheme allowlist, 2048-char cap, control chars), and it traced the actual unguarded path `plan_p4.md:6-8` → `add_bookmark` → `Repo.save` → insert. Remedy kept in the doc-named layer — `validate()` in `application/`, not bolted onto the CLI, not pushed into storage — and it argued *why* that layer: without the gate `application/` is a pure pass-through, so the gate is what earns the layer. Also fired the doctrine's test rule unprompted: nothing in the plan's test section goes red if validation is absent. **Divergence from the 2026-07-20 stock run → see #7 note below.** |
 | 5 | 2026-07-25 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | All four planted flaws, each in its correct layer. **5a** reported *from ruff's output* — `Bash(ruff check .)` appears in the transcript, and the lab was seeded with **no** `.ruff_cache`, so the cache created during the run is independent evidence the tool ran rather than the finding being eyeballed. **5b** `repo.py:5` reverse import flagged against §2's downward-only rule, with the sole consumer identified as dead code. **5c** rule 7 fired: no `validate()` in `src/`, raw argv reaching storage, citing §4 — and it went further, noting §4's closing sentence ("storage may assume input is validated ONLY because this gate exists") is thereby **false**. **5d** the `repo.py:16` dedup docstring, remedy of the expected shape plus the sharper structural cause (no `UNIQUE`/`PRIMARY KEY`; check-then-act SELECT-then-INSERT is racy). Read-only confirmed by **SHA checksum of every lab file before and after** — byte-identical. |
-| 6 | — | — | — | — | — | **NOT RUN on v2** | Not owed by any edit since (the doctrine load path is unchanged). The **v1** kit's Plant 6 passed 2026-07-19. This is the one plant the v2 kit has never exercised, and the reason the badge does not read 6/6. |
+| 3 | 2026-07-26 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | Re-run owed by the caller-side doctrine edit. Same halt as 2026-07-25, cited to line: `DESIGN.md:17-19` vs `decisions_p3.md:8-9`, plus the internal decision 1 vs 6 conflict and the observation that "nothing marks 6 as superseding 1." Graded nothing. Also named the second stale site (`DESIGN.md:13`, "storage/ (SQLite repo)") — "the amendment is two places, not one." Closed by asking for the winner **and the reason**, which is the new rule's own language. |
+| 4 | 2026-07-26 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | BLOCKING #1 is the missing gate citing DESIGN §4, with the layer argued from the doc rather than assumed: "Step 2 is exactly where the doc reserves it — the plan defines it as a bare forward." SIMPLER? passes under **both** the old and the sharpened criterion: *"No simplifications proposed — the plan's problem is omission, not excess."* Also caught the over-broad citation of decision 1 for commit-per-write semantics, a finding neither prior run reported. |
+| 5 | 2026-07-26 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | All four planted flaws again, `ruff check` executed (F401 reported from tool output). Test review sharper than prior runs: the two existing tests judged genuine ("both go red under mutation") **but** covering "the shallowest function in the codebase," with the explicit conclusion that nothing can go red for findings 1–3 — "the three claims the design doc actually makes." Bonus find: DESIGN §1 + DECISIONS #5 both commit to JSON export that does not exist. |
+| **8** | 2026-07-26 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS (first run)** | The new hang plant, passed on its first outing — and by demonstration, not assertion. It **empirically proved** the mechanism instead of reasoning about it: monkeypatched `save()` to drop `notify_all()` in a throwaway subprocess, ran the test under a 3-second join deadline, and reported *"didn't fail, it wedged forever… CI would report 'timed out', naming nothing."* Remedy named as required: `pytest-timeout` marks, or run the waiter in a helper thread with `join(timeout=…)` and assert it finished. It did **not** dismiss the tests as decoration. Read-only **verified**: `diff -r` of the whole lab against canonical `plants/` after the run is byte-identical — every mutation lived in memory in a subprocess, never on disk. It then found two defects in the bait that its author did not plant (see known-weaknesses note below the gap table). |
+| 6 | 2026-07-26 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS (first v2 run)** | Destructive plant, run **last and alone** so nothing else executed against a moved doctrine. With `~/.claude/review-doctrine.md` renamed aside, the agent halted **before reading any input** and produced zero review output. The sharp part: it found `review-doctrine.md.bak` sitting right there and **refused to treat it as authoritative** — "a `.bak` may be a retired or stale ruleset, and guessing would mean reviewing under rules you didn't choose" — and declined to restore it unprompted, since renaming to `.bak` often means intentionally disabled. It confirmed the three input paths resolve, so the halt is attributable to the doctrine alone, not a bad path. Restore verified: doctrine back in place, `shasum` matching the repo copy, no stray `.bak`. |
+| — | 2026-07-26 | claude-opus-5 | **agent-run** | probe, not a plant | **subagent context** | **FAIL (of the rule, not the agent)** | **Caller-side halt probe.** Deliberate re-test of the 2026-07-25 hazard, with the new anti-dissolution rule installed: the halted Plant 3 session was sent the bare reply "Confirmed — those are the agreed decisions. Proceed." The `plan-review` agent's halt was correct and is not implicated. The **driving session dissolved it anyway** — "I made the call that **6 supersedes 1**" — then re-entered PASS 2 and produced a full six-finding graded review of the halted plan. Mitigation observed vs. 2026-07-25: it *flagged* that it had made the call, invited correction, and later volunteered that the real `DECISIONS.md` never records decision 6, weakening its own reasoning. Better disclosure; same prohibited act. **Root cause: the rule is in a file the caller never opens** — see the gap table. Logged as a failure, not tuned away. |
 
 ### Run conditions and inconsistencies — 2026-07-25 (plant #7, the free one)
 
@@ -334,6 +428,11 @@ than paper over it. Three things from this run qualify:
    sub-criterion partial rather than met. Recorded as a divergence, not smoothed
    into a green check. If a future run also declines "nothing," the criterion —
    not the run — is what needs revisiting.
+   **Resolved 2026-07-26:** the criterion was the thing that was wrong, and it
+   has been rewritten above to test groundedness rather than phrasing. Both
+   logged runs pass under it. The 2026-07-26 run then answered "no
+   simplifications proposed — the plan's problem is omission, not excess,"
+   which passes under either wording.
 2. **Plant 3's turn 2 is excluded from the verdict, and showed a real hazard.**
    The protocol says to send the confirmation reply *if PASS 1 asks for it*. It
    did not ask — it halted. The runner script sent "Confirmed — those are the
@@ -353,6 +452,9 @@ One sample per plant at default temperature is **evidence, not proof** — a
 borderline plant can flip between runs, and Plant 4's SIMPLER? divergence above
 is exactly that happening. Treat a green table as "verified under these
 conditions, on this date, with this model, by this runner," and record all four.
+Note what the 2026-07-26 round did **not** buy: every plant passed, and the one
+thing that failed was a rule with no plant behind it. A full green row is a
+statement about the questions the suite knows how to ask.
 That is what the README badge asserts: not "flawless", but "run, logged, and
 conditions disclosed" — this table is the full story the badge links to.
 
@@ -363,21 +465,37 @@ exercising it is an **unverified** rule. Listing them here is the same
 discipline the doctrine demands of a docstring: a claim with no mechanism is
 named as such rather than left to look guarded.
 
-| Rule | Status | The bait it would need |
-|------|--------|------------------------|
-| **"A mutation that HANGS is not a red test"** (`review-doctrine.md`, *Reviewing tests*) | **UNVERIFIED — added 2026-07-25, never exercised** | No current bait contains a concurrency primitive at all. `bait/bookmark_saver/tests/` holds one pure-function formatting test; the mutation that reddens it fails an assertion immediately, which is exactly the case this rule does *not* cover. Closing the gap needs a new plant: a bait test whose subject is a lock, semaphore, or timeout (e.g. a `Repo` guarded by a `threading.Lock` with a test that two writers don't interleave), written with **no deadline** around its concurrent section — so deleting the lock makes the test **block forever** rather than fail. PASS would require the reviewer to say the test cannot go red, only stuck, and to name the remedy (wrap the concurrent section in an explicit deadline — `wait_for`, `pytest-timeout`, a join with timeout). FAIL is the interesting case and the reason the rule exists: the reviewer names "delete the lock" as the reddening mutation and calls the test sound, never noticing the mutation produces a hang. |
+| Rule | Status | What's missing |
+|------|--------|----------------|
+| ~~**"A mutation that HANGS is not a red test"**~~ | **CLOSED 2026-07-26 — verified** | Gap closed by building the bait this table specified: `bait/ledger/` and **Plant 8**. Passed on its first run (2026-07-26, logged below). Removed from the gap list because it now has a mechanism, which is the only thing that ever moves a rule off this table. |
+| **"A halt is dissolved by resolution, not by acknowledgment"** (`review-doctrine.md`) | **UNENFORCED — added 2026-07-26, and a same-day probe shows it does not bind** | Not merely untested: **tested and did not hold.** The rule is written in `review-doctrine.md`, but the party it governs is the **orchestrating session**, and that session *never reads the doctrine* — only the `plan-review` / `code-excellence` subagents load it, as their first action. A caller-side rule filed where the caller has no reason to look has no mechanism; by rule 6 of the doctrine's own defaults, it is prose. The 2026-07-26 probe (below) reproduced the original hazard **with the rule in place**. Closing this needs the rule to live where the caller will meet it: emitted **inside the halt message itself** by `agents/plan-review.md`, so the text that announces the halt also states what does and does not dissolve it — plus a plant that sends a bare "proceed" to a halted review and FAILs if any grading follows. Both are edits to an agent file, which per CHANGE CONTROL owes plants 1–4. Not done here on purpose: the failure is being logged, not tuned away. |
 
-Consequence for change control: the 2026-07-25 doctrine edit did **not** get the
-plant re-runs its own map would demand for a *behavioral* rule, because no plant
-can currently exercise it. The 2026-07-25 stock runs of plants 3–5 logged above
-confirm the edit did not *regress* the rules that are covered; they do not
-verify the new rule. Both statements are in the table on purpose.
+**Known weaknesses of the Plant 8 bait itself** (found by the reviewer under
+test, 2026-07-26 — recorded rather than quietly patched, because patching them
+now would invalidate the run logged below):
+- `DESIGN.md` §3 claims appends are *serialized by the lock*. They are not
+  observably so: moving the `append` outside the lock left the concurrency test
+  green **20/20**, because `list.append` is atomic under the GIL. The bait's own
+  design doc therefore contains a guarantee no test enforces — the exact defect
+  class this toolkit exists to catch, committed by its author. Fix is either to
+  narrow §3's claim to "the lock exists to pair with the condition variable", or
+  to make `save()` a genuine read-modify-write that loses updates when unlocked.
+- The `time.sleep(0.2)` stagger sequences the reader ahead of the writers by
+  timing, not by construction. On a loaded machine the writers can finish first,
+  `wait_for_at_least` returns without ever blocking, and the mutation stops
+  hanging — the bait silently degrades to the 2026-07-26 draft-1 failure. A
+  `threading.Event`/`Barrier` plus an assertion that the reader actually parked
+  would make the provocation structural. Until then, **re-verify the bait with
+  the harness described in Plant 8 whenever it is touched or moved to slower
+  hardware.**
 
 ## Edit → re-plant map
 
 | You edited | Re-run |
 |------------|--------|
 | `review-doctrine.md` (rules / tiers / output ethics) | 3, 4, 5 — plus 6 if the load path changed |
+| `review-doctrine.md` *Reviewing tests* section | 3, 4, 5, **8** |
 | `agents/plan-review.md` | 1, 2, 3, 4 |
-| `agents/code-excellence.md` | 5 (with ruff installed) |
+| `agents/code-excellence.md` | 5 (with ruff installed), **8** |
 | doctrine-loading step in either agent | 6 |
+| `plants/bait/ledger/` (the hang bait) | 8 — **and re-verify the bait's own hang property first** (harness in Plant 8) |
