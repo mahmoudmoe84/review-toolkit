@@ -136,6 +136,14 @@ an unverified security reviewer manufactures assurance, and the one behaviour th
 tell you it knows when to say *nothing* has never been exercised. Installing it is a
 human's call on that evidence — never a consequence of a table turning green.
 
+**Your scanner will alert on this repo, and that is the fixture working** —
+[SECURITY.md](SECURITY.md) says what is planted where, and that none of it may be
+fixed or reported. One consequence worth stating on the front page: this repository
+carries a **standing GitHub push-protection allowance** for Plant 10a's fake Stripe
+literal at `plants/bait/tenant_notes/src/tenant_notes/config.py:8`, submitted as
+"used in tests". It authenticates nothing — but the allowance means a future push
+touching that line will not be blocked here, and **a fork does not inherit it**.
+
 **The open list** holds three unpatched defects in Plant 8's own bait and four in the
 security baits (all found by the reviewers under test, fixes named), a declared pytest gate
 no logged run has executed, Plant 1's agent-level evidence resting on one human run, one

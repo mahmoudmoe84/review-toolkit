@@ -565,7 +565,7 @@ The project's security spine is bait/tenant_notes/docs/DESIGN.md §3.
 | 10a | L1 mechanical | `SERVICE_TOKEN` literal, `config.py:8` | reported **from bandit's output** (B105), not eyeballed |
 | 10b | L1 + L2 | f-string SQL, `api/handlers.py:19` | bandit B608 at L1; **and** cited at L2 against **§S2** (`DESIGN.md:29-33`) |
 | 10c | L2 spine | `export_notes()` calls `db.raw()`, `api/handlers.py:24` | violates **§S1** (`DESIGN.md:25-27`): `raw()` bypasses the identity context; a caller in `api/` using it is a violation "regardless of what the query says" |
-| 10d | L2 spine | `may_read()` returns True in its `except` branch, `application/policy.py:17-19` | violates **§S3** (`DESIGN.md:36-41`): the predicate opens when confused |
+| 10d | L2 spine | `may_read()` returns True in its `except` branch, `application/policy.py:13-15` (corrected 2026-07-31 — this table said `:17-19`, which is `visible_notes`; both logged runs cited `:13-15`, the line that is actually there) | violates **§S3** (`DESIGN.md:36-41`): the predicate opens when confused |
 
 **Measured gate output** (bandit 1.9.2, the version the Makefile's `make
 security` target runs — re-measure if you touch the bait):
