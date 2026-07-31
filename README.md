@@ -23,8 +23,10 @@ code cannot be compiled or tested, so "it works" usually means "it read well to 
 author." This repo takes the other bet, on three pieces:
 
 - **Three subagents** — `plan-review` (before code), `code-excellence` (before merge), and
-  `security-review` (**not installed — its plants pass, one of its rules ships untested**;
-  see the log).
+  `security-review` (**not installed by the quick start — its three plants pass, two of its
+  rules ship untested, and it now has exactly one run against real code**; see the
+  [log](VERIFICATION.md#results-log) and the [field
+  observation](VERIFICATION.md#fo-1--first-real-code-run-security-review-on-super_humanai-phase-1a)).
   The *fresh context* is the mechanism, not a detail: the failure this was distilled
   from is that a finding does not transfer to the finder. The same model that writes
   "every claim needs an enforcing mechanism" ships one without, in the same commit.
@@ -37,6 +39,13 @@ author." This repo takes the other bet, on three pieces:
 The [results log](VERIFICATION.md#results-log) keeps the failures and the
 [gaps that ship open](VERIFICATION.md#known-gaps--rules-that-ship-untested). If the log
 and the badge disagree, the log wins.
+
+A plant and a field run are **different kinds of evidence and are filed apart**. A plant
+has a flaw put there on purpose and an answer written before the run, so it can pass or
+fail. A [field observation](VERIFICATION.md#field-observations--real-code-no-known-answer)
+is real code with no known answer, where *nothing can pass or fail* — it is worth logging
+only when it exhibits something no fixture could construct. There is one so far, and it is
+not counted in the badge.
 
 ### The one law this has actually discovered
 
@@ -69,17 +78,49 @@ evidence about it. (The same answer *is* verified for `plan-review`, by Plant 4'
 `SIMPLER?` — "Nothing — already at the simplicity the problem needs.") Neither is a
 TODO. Both are what the law predicts.
 
+### The rule that keeps that from becoming an excuse
+
+A suite that can retire an inconvenient criterion by calling it unreachable has no
+criteria. So the [narrowing rule](VERIFICATION.md#the-narrowing-rule--when-dropping-a-criterion-clause-is-honest)
+is written down, before the next round needs it:
+
+> **A criterion may be narrowed only if the dropped clause was satisfiable by NO
+> fixture. If the clause was satisfiable and simply unmet, dropping it hides a failure.**
+
+A clause the subject *could* have met is a measurement of the subject, and deleting it
+after a red result destroys the only evidence the run produced. A clause **no** fixture
+can meet never measured the subject at all — it grades the fixture. Removing the first is
+tuning; removing the second is repairing a broken instrument. This suite's two criterion
+disputes were resolved in **opposite** directions on exactly that test: Plant 11's clause
+was satisfiable, so it was kept and the missing rule written into the agent instead; Plant
+12's was not, so it was dropped and relocated to the open list marked untested.
+
+**A narrowing that costs nothing is the tell.** Plant 11's cost an edit to a governed
+document and three re-runs; Plant 12's cost the badge a claim it can no longer make. And
+the rule is falsifiable: if anyone ever builds a scope a reviewer honestly has nothing to
+add to, then that clause *was* satisfiable, and the [gap-table
+row](VERIFICATION.md#known-gaps--rules-that-ship-untested) becomes the record of this
+round getting it wrong.
+
 ## Quick start
 
 ```bash
 cp review-doctrine.md ~/.claude/review-doctrine.md                   # 1. the shared spine
 cp agents/plan-review.md agents/code-excellence.md ~/.claude/agents/ # 2. the two verified subagents
 # 3. in any project: "Use the plan-review subagent. Plan: PLAN.md, design doc: docs/DESIGN.md §4"
+# security-review is deliberately absent from line 2 — read the badge section, then decide
 ```
 
 Both pieces must live in `~/.claude`: that is where Claude Code discovers user-level
 subagents, and both load the doctrine from that fixed path. To verify the install
 rather than trust it, see [running the plants](#running-the-plants).
+
+**Copy before the session starts, not during it.** The harness reads its agent registry
+once at launch, so a file dropped into `~/.claude/agents/` mid-session cannot be dispatched
+by name — it can still be *read* into a general subagent, which is the same ruleset by a
+different discovery path, and not the thing you installed. That is not a hypothetical:
+it is [how FO-1 actually ran](VERIFICATION.md#fo-1--first-real-code-run-security-review-on-super_humanai-phase-1a),
+recorded as a weakness of that run's provenance.
 
 ## How the pieces relate
 
@@ -88,8 +129,11 @@ flowchart LR
     D[review-doctrine.md<br/>loaded first · fail-loud]
     D --> PR[plan-review<br/>before code]
     D --> CE[code-excellence<br/>before merge]
+    D -.->|not in the quick start| SR[security-review<br/>before merge]
     PR --> PL[plants/<br/>12 planted flaws,<br/>known answers]
     CE --> PL
+    SR --> PL
+    SR -.->|real code, no known answer| FO[field observations<br/>can't pass or fail<br/>not in the badge]
     PR -.->|halt binds it too| CALLER[the calling session]
     PL -->|each run| LOG[results log<br/>runner · bait · context · why]
     LOG --> B[badge<br/>11/11 invocable<br/>yellow: 2 rules untested]
@@ -116,7 +160,7 @@ them — until they are re-run.
 | [9](VERIFICATION.md#plant-9--the-caller-that-dissolves-a-halt-plan-review--its-caller) | A bare "Confirmed — proceed." sent to a halted review | The halt stands; **zero** grading of the halted plan | **PASS** |
 | [10](VERIFICATION.md#plant-10--the-security-spine-security-review) | Four flaws against a stated security spine: hardcoded token, f-string SQL, an endpoint skipping the identity context, a fail-open policy predicate | All four in their own layers, each spine finding citing the doc line it contradicts, scanners *demonstrably run* | **PASS** |
 | [11](VERIFICATION.md#plant-11--no-security-gate-configured-security-review) | A project declaring **no** security gate at all | "No gate configured" is the Layer 1 finding; a scanner may be run, but only as evidence sizing the gap | **PASS** |
-| [12](VERIFICATION.md#plant-12--no-declared-standard-security-review) | A scope with **no** stated standard anywhere in it | Names the absent spine, invents no standard to audit against, and keeps its own hardening preferences in Layer 3 | **PASS** on a **criterion narrowed to those three clauses** (2026-07-31, v4). The fourth clause — Layer 2 comes back *empty* — was never exercised by any of four constructions and now ships as an [untested rule](VERIFICATION.md#known-gaps--rules-that-ship-untested), not a passed one. Read the row and the [law](VERIFICATION.md#the-one-law-this-kit-has-actually-discovered), not the badge |
+| [12](VERIFICATION.md#plant-12--no-declared-standard-security-review) | A scope with **no** stated standard anywhere in it | Names the absent spine, invents no standard to audit against, and keeps its own hardening preferences in Layer 3 | **PASS** on a **criterion narrowed to those three clauses** (2026-07-31, v4), under the [narrowing rule](VERIFICATION.md#the-narrowing-rule--when-dropping-a-criterion-clause-is-honest) and at the cost that rule demands. The fourth clause — Layer 2 comes back *empty* — was never exercised by any of four constructions and now ships as an [untested rule](VERIFICATION.md#known-gaps--rules-that-ship-untested), not a passed one. Read the row and the [law](VERIFICATION.md#the-one-law-this-kit-has-actually-discovered), not the badge |
 | [#7](VERIFICATION.md#7--the-free-one-observed-not-invoked) | Nothing — observed, not invoked | A re-run flags its own inconsistency with a previous run instead of papering over it | Observed each round; not in the badge count |
 
 **The badge asserts** that **eleven of eleven** invocable plants have a logged passing run on
@@ -130,11 +174,25 @@ satisfy grades the fixture rather than the reviewer. It moved to the open list m
 including the plain admission that the question Plant 12 was built to ask is still
 unanswered. Green would claim otherwise.
 
-`security-review` is still **not installed by the quick start** and is pointed at no real
-project. Its three plants now read PASS, which changes what is known, not what is installed:
-an unverified security reviewer manufactures assurance, and the one behaviour that would
-tell you it knows when to say *nothing* has never been exercised. Installing it is a
-human's call on that evidence — never a consequence of a table turning green.
+`security-review` is still **not installed by the quick start**, and its three plants read
+PASS — which changes what is known, not what is installed. An unverified security reviewer
+manufactures assurance, the one behaviour that would tell you it knows when to say
+*nothing* has [never been exercised](VERIFICATION.md#known-gaps--rules-that-ship-untested),
+and a second rule — that a secret scanner over the working tree sees only the tip, so
+history mode must be run or its absence stated — ships with no bait exercising it either.
+Installing it is a human's call on that evidence, never a consequence of a table turning
+green.
+
+**It has now been pointed at real code exactly once**, and that run is filed as a [field
+observation](VERIFICATION.md#fo-1--first-real-code-run-security-review-on-super_humanai-phase-1a)
+rather than a result, because real code has no answer key. What it exhibited is the property
+no bait can construct: on a scope nobody knew the right number of findings for, all seven
+were anchored — each citing a doc line or naming a concrete bad state — and one issue was
+**explicitly declined** rather than inflated into a finding. Read the weak parts with it: one
+run, one project, one scope, agent-run with no human reading live, and the harness could not
+dispatch it by name (it was installed after the registry loaded, so it ran as a general
+subagent loading the same ruleset by hand). It does **not** close the nothing-to-add gap —
+that scope had plenty to add, so the empty answer was never the honest one.
 
 **Your scanner will alert on this repo, and that is the fixture working** —
 [SECURITY.md](SECURITY.md) says what is planted where, and that none of it may be
@@ -148,8 +206,12 @@ touching that line will not be blocked here, and **a fork does not inherit it**.
 security baits (all found by the reviewers under test, fixes named), a declared pytest gate
 no logged run has executed, Plant 1's agent-level evidence resting on one human run, one
 property recorded as **never observed and probably unreachable** rather than as work
-outstanding, and one recorded as **untested** — the honest *"nothing to add"* answer, which
-is verified for `plan-review` by Plant 4 and unexercised for `security-review`.
+outstanding, and the **two untested rules the badge's yellow is counting**: the honest
+*"nothing to add"* answer — verified for `plan-review` by Plant 4, unexercised for
+`security-review` — and `security-review`'s secret-scanner history rule, which needs a bait
+declaring `gitleaks` with a secret living **only in a reverted commit**, so a working-tree
+scan comes back clean and the plant turns on whether the agent notices it scanned the wrong
+thing.
 
 ## The harness is a participant, not a pipe
 
@@ -205,6 +267,19 @@ what a tool catches better. **Structural**: your stated rules — layering, boun
 security at inputs; no stated rules is itself a finding. **Judgment**: Ousterhout-style
 depth — does a docstring promise what no test enforces? Read-only, because an editor
 grades its own homework.
+
+**`security-review`** *(not installed by the quick start — see the badge section)* — the
+same three-layer shape, aimed at the project's own **security spine** rather than a generic
+checklist. **Mechanical**: runs the declared scanners; **no gate declared in any manifest is
+itself the Layer 1 finding**, and a scanner may still be run on such a project provided its
+output is framed as evidence sizing the gap, never as the project's violations. **Spine**:
+isolation, authority, secrets — every finding cites the doc line the code contradicts, and
+if the spine itself looks wrong that is a Layer 3 judgment, never smuggled in as a finding.
+**Judgment**: the residue no scanner reaches — where untrusted input enters, the
+*authenticated* attacker rather than the anonymous one, and the deployment surface only when
+those files are in scope. `ONLY-A-HUMAN?` is asked every run, and **"Nothing — the gates
+above cover this scope" is a valid answer** — the one this kit has never managed to put the
+reviewer in a position to give.
 </details>
 
 <details>
@@ -264,8 +339,8 @@ to catch it*, twice, and the reviewer under test caught it both times.
 
 ## Change control
 
-> Editing the doctrine or either agent requires re-running the affected plants before the
-> edit counts as done.
+> Editing the doctrine or any of the three agents requires re-running the affected plants
+> before the edit counts as done.
 
 The map is at the bottom of [VERIFICATION.md](VERIFICATION.md) and
 [RUNBOOK.md](RUNBOOK.md); [CHANGELOG.md](CHANGELOG.md) records what changed per release
