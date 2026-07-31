@@ -231,10 +231,15 @@ literal at `plants/bait/tenant_notes/src/tenant_notes/config.py:8`, submitted as
 "used in tests". It authenticates nothing — but the allowance means a future push
 touching that line will not be blocked here, and **a fork does not inherit it**.
 
-**The open list** holds three unpatched defects in Plant 8's own bait and six in the
-security baits — every one of them found by the reviewers under test, and that is where the
-symmetry stops: Plant 8's carry named remedies, the security six are logged without any, so
-"found" and "fixable" are not the same column. It also holds a declared pytest gate
+**The open list** holds three unpatched defects in Plant 8's own bait (remedies named) and
+six across the security baits — **code-checked 2026-08-01, and not the six the list's own
+bullets name**: `tenant_notes`' three are present as written plus the `Db.insert()` spine
+gap its round-2 row logged, while `tokenring`'s three listed entries were superseded by the
+v3 rebuild — what survives there is `issue()`'s rule-7 gap and a refusal guard no test can
+redden. The [recheck note](VERIFICATION.md#known-gaps--rules-that-ship-untested) carries the
+per-item status, including the admission that a count read off the bullets rather than the
+code shipped to this page and was right in total, wrong in membership. None of the security
+six names a remedy — "found" and "fixable" are not the same column. It also holds a declared pytest gate
 **no logged run has executed** — not one reviewer under test has run these bait suites, and
 their green is the author's word — Plant 1's agent-level evidence resting on one human run, one
 property recorded as **never observed and probably unreachable** rather than as work
@@ -380,11 +385,12 @@ the other is how this file came to exist.
 <summary><b id="running-the-plants">Running the plants</b></summary>
 
 ```bash
-cp -R plants ~/Desktop/plant-lab   # the plant kit ONLY — no answer key, no doctrine, no docs
+# from the repo root:
+cp -R plants ~/Desktop/plant-lab            # the plant kit ONLY — no answer key, no doctrine, no docs
+mkdir -p ~/Desktop/plant-lab/.claude/agents                        # plants 10-12 only:
+cp agents/security-review.md ~/Desktop/plant-lab/.claude/agents/   # the agent under test
 cd ~/Desktop/plant-lab
-pip install ruff pytest bandit pip-audit   # every gate the baits declare, not just ruff
-mkdir -p .claude/agents                    # plants 10-12 only:
-cp ~/dev/review-toolkit/agents/security-review.md .claude/agents/   # the agent under test
+pip install ruff pytest bandit pip-audit    # every gate the baits declare, not just ruff
 claude
 ```
 
@@ -432,13 +438,14 @@ The map is at the bottom of [VERIFICATION.md](VERIFICATION.md) and
 and the re-runs each change owed. An unverified edit silently un-verifies the toolkit: the
 "verified" label belongs to a version, not to a name.
 
-**Two places where this rule is currently owed something, stated rather than quietly
-carried.** `review-doctrine.md` still opens "shared by `plan-review` and `code-excellence`"
-and scopes its own change control to "either agent" — it does not know the third agent
-exists, though `security-review` loads it and obeys it. And the release badge above reads
-**v1.2** while an entire agent, three plants, `SECURITY.md`, the narrowing rule and the
-first field observation have landed since, none of them in the changelog. Both are
-paperwork, not behaviour; both are the kind of paperwork this repo says counts.
+**One place where this rule is still owed something, stated rather than quietly carried.**
+`review-doctrine.md` still opens "shared by `plan-review` and `code-excellence`" and scopes
+its own change control to "either agent" — it does not know the third agent exists, though
+`security-review` loads it and obeys it. Fixing that header is an edit to a governed file,
+so it waits for a change that owes re-runs anyway rather than spending a sweep on a
+self-description. (The debt this paragraph used to carry alongside it is paid: the
+unreleased span is recorded in [CHANGELOG.md](CHANGELOG.md)'s Unreleased section as of
+2026-08-01, and the release badge points at it.)
 
 ---
 
