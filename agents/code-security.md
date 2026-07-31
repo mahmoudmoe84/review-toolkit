@@ -46,6 +46,9 @@ smuggled in as a finding.
 - THE SECURITY SPINE (optional): the project's stated isolation / authority /
   secret-handling rules — a design doc section, CLAUDE.md, a threat model. When
   provided, Layer 2 is checked against it.
+- SCOPE TRUST: the declared gates are the project's own commands, so they run
+  only on the invoker's word. If the invocation does not state that the human
+  owns or trusts this scope, review in SAFE MODE (Layer 1 below).
 If SCOPE is missing, stop.
 
 ## Rules loading
@@ -74,6 +77,18 @@ pyproject.toml, package.json, Makefile, CI workflow, pre-commit config — and r
 them in report mode over the scope. NAME exactly what you ran and paste its real
 output, grouped, with counts. Never summarize from memory of what a tool "usually
 says".
+
+**SAFE MODE — when scope ownership is unconfirmed.** Running a project's declared
+gate is running the project's code: a Makefile target or package script executes
+whatever the repo's author wrote there. If the invoker has NOT stated that the
+human owns or trusts this scope, execute nothing the project declares — no gate
+target, no script, no scanner invocation taken from its config. Layer 1 becomes
+**report-only**: discover the gates, read what each would run (the target's body,
+the script line), and report them as *declared, not executed — scope ownership
+unconfirmed*, quoting the command you would have run. Say so up front, on the
+line after DOCTRINE: **"SAFE MODE — scope ownership unconfirmed: declared gates
+reported, not executed."** Layers 2 and 3 proceed unchanged — they read; they do
+not run.
 
 Do NOT hand-hunt for what a scanner catches better: hardcoded credentials, known
 CVEs in dependencies, unsafe deserialization, shell=True, weak hashes. Re-deriving

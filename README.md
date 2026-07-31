@@ -351,7 +351,11 @@ the tool list, so "never edits" is a harness-level guarantee rather than a promi
 prompt. **Bash is granted** — these agents run your linters, your scanners and read-only
 `git` on your machine — and *that* restraint is prose discipline in the agent file, not a
 tool boundary: never install anything, never `--fix`, never write a baseline or allowlist,
-never a state-changing git command.
+never a state-changing git command. **And the gates run only on your word** (SAFE MODE,
+2026-08-01): a project's declared gate is the project's own code, so unless your invocation
+states you own or trust the scope, Layer 1 reports the gates without executing them and
+Layers 2–3 proceed read-only. The refusing branch is itself
+[untested until Plant 15 exists](VERIFICATION.md#open-findings--2026-08-01-full-review-recorded-not-fixed).
 
 **`code-security`** *(renamed from `security-review` 2026-08-01; not installed by the quick
 start — see the badge section)* — the
