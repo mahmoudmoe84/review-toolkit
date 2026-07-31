@@ -3,8 +3,12 @@
 Dates here are **git dates** — the only clock in this repo with an independent
 record. The results log in [VERIFICATION.md](VERIFICATION.md) carries some run
 labels (`2026-07-26`, `2026-07-27`) that run ahead of the calendar; they are round
-labels, not days, and git places every commit between 2026-07-19 and 2026-07-25.
-Where a label and git disagree, git wins.
+labels, not days, and git places the commits those labels annotate between
+2026-07-19 and 2026-07-25. Where a label and git disagree, git wins. (Corrected
+2026-08-01: this paragraph said git places *every* commit by 2026-07-25 — true at
+v1.2, false since the security round landed on 2026-07-31. The repo's commits now
+run through 2026-08-01, and the `2026-07-31` dates on the security rows are
+calendar dates, not round labels.)
 
 This project's change-control rule applies to every entry below: editing the
 doctrine or either agent un-verifies the plants its
@@ -12,6 +16,65 @@ doctrine or either agent un-verifies the plants its
 re-run. Each entry names the re-runs it owed.
 
 ---
+
+## Unreleased — on `main` since v1.2 (2026-07-31 → 2026-08-01)
+
+Recorded 2026-08-01, two days after the span began — this section is itself a
+correction: an entire agent, three plants, a security policy and a new governing
+rule had landed with no changelog entry, a state the change-control paragraph
+above forbids. Not a release: no version is minted here, and the next release
+owes the full re-run sweep as usual.
+
+### Added — the security round (2026-07-31)
+
+- **`agents/security-review.md`** — the third subagent: the three-layer shape
+  aimed at a project's stated security spine, `ONLY-A-HUMAN?` asked every run.
+  With it, three new baits (`tenant_notes`, `quickcsv`, `tokenring`) and
+  **Plants 10, 11, 12**. Maiden round: **1 PASS / 2 FAIL**, both failures
+  construction errors, stated plainly in the log (`52732bc`).
+- **The Layer 1 undeclared-scanner rule**, written into the agent after Plant
+  11's criterion dispute — the criterion was then rewritten to test the rule.
+  Per the re-plant map this agent edit owed Plants 10, 11, 12: run and logged —
+  10 PASS, 11 PASS (closing the disputed rule), 12 FAIL again on defects its own
+  patch introduced (`6ff91b4`).
+- **Plant 12 v3 and v4** — the bait rebuilt with no design doc, which still
+  failed (doctrine rule 7 became the spec; the run proved `issue("")` mints a
+  verifiable empty principal); then the criterion narrowed from four clauses to
+  three under the new **narrowing rule**, PASS by re-grade of the same
+  transcript, no new run, dropped clause to the gap table as UNTESTED
+  (`d6fd108`, `9264b45`).
+- **The bait stop rule** — a fixture is patched only when a required property of
+  its plant breaks; everything else is logged and left. VERIFICATION.md only; no
+  governed file touched, no re-runs owed (`ed9753b`).
+- **SECURITY.md** — what is planted where, that none of it may be fixed or
+  reported, and the standing push-protection allowance (`f83576c`, `6b847b0`).
+- **The narrowing rule** (when dropping a criterion clause is honest) and
+  **FO-1**, the first field observation — `security-review` on real code, filed
+  as evidence that cannot pass or fail (`b396b6a`).
+
+### Changed — documentation truth passes (2026-08-01)
+
+- **README rebuilt twice**: once for drift the security round left behind
+  (PR #5), then against a full audit of its own claims — three corrected as
+  never true, plant-table criteria restored, counts fixed, the hero art's green
+  "8/8 · two subagents · 9 plants" replaced with the yellow truth (PR #6).
+- **Log and answer key re-checked against the shipped baits** — the security
+  open list annotated with a code-verified recount (the `tokenring` bullets were
+  superseded by the v3 rebuild), RUNBOOK's Plant 10d cite corrected from
+  `policy.py:17-19` to `:13-15`, the git date window updated in both files that
+  stated it, and this entry added (this PR).
+
+### Owed and open, carried forward
+
+- `review-doctrine.md` still opens "shared by `plan-review` and
+  `code-excellence`" and scopes change control to "either agent" — it does not
+  know the third agent exists, though `security-review` loads and obeys it.
+  Fixing the header edits a governed file; it waits for an edit that owes
+  re-runs anyway.
+- The lab-runnability gap: a plants-only copy cannot dispatch Plants 10–12
+  without the agent placed at `<lab>/.claude/agents/`, and the full gate set is
+  ruff + pytest + bandit + pip-audit. The README now says both; the `plants/`
+  tree itself is untouched.
 
 ## v1.2 — 2026-07-25
 
