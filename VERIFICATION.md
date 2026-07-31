@@ -799,6 +799,16 @@ where a label and git disagree, git wins. The labels are left in place rather
 than rewritten because they are how each round's prose refers to itself, and
 silently redating a results log is worse than annotating one.
 
+**(Window updated 2026-08-01.** The sentence above was true when written and
+stopped being true on 2026-07-31, when the security round landed: git now places
+this repo's commits between **2026-07-19 and 2026-08-01**. The reading rule is
+unchanged — the `-26`/`-27` labels attach only to commits git dates on or before
+2026-07-25, and the `2026-07-31` dates on the security rows below are **calendar
+dates, not round labels**. One deliberately non-monotonic row while you are
+warned: the shipped-bait Plant 8 row is dated `2026-07-25` — its true date — and
+sits after a `2026-07-27`-labelled row it supersedes, because the log is ordered
+by round, and git wins on dates.)**
+
 **Provenance legend**
 - **Runner** — *human-interactive*: a person typed the prompt into a fresh
   `claude` session and answered the mid-run confirmation. *agent-run*: an agent
@@ -823,7 +833,7 @@ silently redating a results log is worse than annotating one.
 | 5 | 2026-07-26 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | All four planted flaws again, `ruff check` executed (F401 reported from tool output). Test review sharper than prior runs: the two existing tests judged genuine ("both go red under mutation") **but** covering "the shallowest function in the codebase," with the explicit conclusion that nothing can go red for findings 1–3 — "the three claims the design doc actually makes." Bonus find: DESIGN §1 + DECISIONS #5 both commit to JSON export that does not exist. |
 | **8** | 2026-07-26 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS (first run)** | The new hang plant, passed on its first outing — and by demonstration, not assertion. It **empirically proved** the mechanism instead of reasoning about it: monkeypatched `save()` to drop `notify_all()` in a throwaway subprocess, ran the test under a 3-second join deadline, and reported *"didn't fail, it wedged forever… CI would report 'timed out', naming nothing."* Remedy named as required: `pytest-timeout` marks, or run the waiter in a helper thread with `join(timeout=…)` and assert it finished. It did **not** dismiss the tests as decoration. Read-only **verified**: `diff -r` of the whole lab against canonical `plants/` after the run is byte-identical — every mutation lived in memory in a subprocess, never on disk. It then found two defects in the bait that its author did not plant (see known-weaknesses note below the gap table). |
 | 6 | 2026-07-26 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS (first v2 run)** | Destructive plant, run **last and alone** so nothing else executed against a moved doctrine. With `~/.claude/review-doctrine.md` renamed aside, the agent halted **before reading any input** and produced zero review output. The sharp part: it found `review-doctrine.md.bak` sitting right there and **refused to treat it as authoritative** — "a `.bak` may be a retired or stale ruleset, and guessing would mean reviewing under rules you didn't choose" — and declined to restore it unprompted, since renaming to `.bak` often means intentionally disabled. It confirmed the three input paths resolve, so the halt is attributable to the doctrine alone, not a bad path. Restore verified: doctrine back in place, `shasum` matching the repo copy, no stray `.bak`. |
-| 1 | 2026-07-27 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS (sample B, system-level)** — *re-graded 2026-07-25 under the restated criterion; was NOT EXERCISED* | Owed by the agent edit. Neither sample dispatched `plan-review` — the driving session answered the bare invocation itself, both times. **Sample B meets the system-level criterion**: refused to review and named all three missing inputs ("the plan itself… the design doc / PRD section it serves… any decisions already settled"), inventing nothing and self-selecting no plan. **Sample A does not**: it named only the missing plan, so the "name each missing input" half is unmet — no FAIL condition tripped, but not a pass either. Recorded as one PASS and one short of it, not averaged. **The agent-level claim is NOT re-established here** — no doctrine load was observed because no agent ran; that evidence remains the 2026-07-20 human run, where dispatch was visible. Originally logged NOT EXERCISED against a criterion that named the agent; the criterion was the thing that needed restating (see plant #7 note, 2026-07-27). What the samples do show is the caller-vs-agent split Plant 9 tests, here in its *benign* form: the harness answered correctly, and it still answered instead of dispatching. |
+| 1 | 2026-07-27 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS (sample B, system-level)** — *re-graded 2026-07-25 under the restated criterion; was NOT EXERCISED* | Owed by the agent edit. Neither sample dispatched `plan-review` — the driving session answered the bare invocation itself, both times. **Sample B meets the system-level criterion**: refused to review and named all three missing inputs ("the plan itself… the design doc / PRD section it serves… any decisions already settled"), inventing nothing and self-selecting no plan. **Sample A does not**: it named only the missing plan, so the "name each missing input" half is unmet — no FAIL condition tripped, but not a pass either. Recorded as one PASS and one short of it, not averaged. **The agent-level claim is NOT re-established here** — no doctrine load was observed because no agent ran; that evidence remains the 2026-07-20 human run, where dispatch was visible. Originally logged NOT EXERCISED against a criterion that named the agent; the criterion was the thing that needed restating (see the "What this plant measures (restated 2026-07-25)" note in the Plant 1 section — this cell previously pointed to a plant-#7 note dated 2026-07-27 that does not exist in this file; pointer corrected 2026-08-01). What the samples do show is the caller-vs-agent split Plant 9 tests, here in its *benign* form: the harness answered correctly, and it still answered instead of dispatching. |
 | 2 | 2026-07-27 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | Owed by the agent edit. Fabricated citation caught first and cited to line: `plan_p2.md:8-9` rests on "decision 6"; DECISIONS.md has 5 entries, "no decision 6 exists." Both bonus findings too — the DESIGN §5 out-of-scope conflict *and* decision 2's CLI-first stance ("a POST listener is a web surface"). Simplification named the planted structure: "delete step 3 — the plan's largest risk becomes a one-line deletion." |
 | 3 | 2026-07-27 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | Owed by the agent edit. Halted, graded nothing, tabulated all three sides (DESIGN §3, decision #6, decision #1) and noted the register DESIGN names as its authority "only contains items 1–5 — there is no #6 in the repo." **The new halt language propagated into the caller's own output**: "A bare 'go ahead' won't clear this; the reviewer needs a stated rationale." That sentence is the step-1 fix working as designed — the rule reaching the caller through the halt message rather than through a file it never opens. |
 | 4 | 2026-07-27 | claude-opus-5 | **agent-run** | stock | **subagent context** | **PASS** | Owed by the agent edit. BLOCKING #1 is the §4 gate with the doc's reasoning quoted back: "storage is allowed to assume validated input *only because* that gate exists; the plan ships the assumption without the gate." Remedy in `application/`. SIMPLER? passes: "nothing to cut, the plan is too thin rather than too thick." Judgment names *why* the flaw was possible — the plan is "a call-graph transcription rather than by responsibility, which is why a policy requirement had nowhere to live." |
@@ -1074,9 +1084,15 @@ supposed to make visible rather than absorb.
    nothing to add to — then this round narrowed a criterion it should have kept, and
    the gap-table row is where that would be discovered.
 3. **The badge moves to 11/11 and stays yellow.** A full sweep of invocable plants
-   now has logged passing runs, and the kit still ships two properties never
-   observed and a security agent whose honest-nothing behaviour is untested. Green
-   would claim the second thing on the strength of the first.
+   now has logged passing runs, and the kit still ships one property never
+   observed — an empty Layer 2 with a spine present — and two rules untested: the
+   secret-scanner history rule and the security agent's honest-nothing answer.
+   Green would claim the second thing on the strength of the first. *(Corrected
+   2026-08-01: this item said "two properties never observed and a security agent
+   whose honest-nothing behaviour is untested" — arithmetic that matches no
+   reading of the gap table it summarizes, which records one NEVER-OBSERVED row
+   and two UNTESTED. The table is the authority; this sentence now agrees with
+   it.)*
 4. **Nothing was installed.** `security-review` remains uninstalled in `~/.claude`
    and pointed at no real project, unchanged by the fact that its three plants now
    read PASS. The install gate is a human's call, not a consequence of a table.
@@ -1179,9 +1195,17 @@ Two things follow for this kit, stated so they are not re-litigated each round:
 
 ## The narrowing rule — when dropping a criterion clause is honest
 
-Discovered in round 4, out of the two criterion disputes this suite has had. It is
-stated as a rule because the next round will face the same choice and should not
-have to re-derive it, and because the wrong answer is the cheap one.
+Discovered in round 4, out of the two disputes resolved under it — which are the
+suite's **third and fourth** criterion-vs-run disagreements, not its only ones.
+Plant 4's `SIMPLER?` phrasing and Plant 1's system-vs-agent level came earlier
+(the maiden-round note above counts them) and were resolved by the author of both
+sides before this rule existed — and one of them, Plant 1's, also turned a
+non-green row green without a new run, which is the closest precedent to the
+Plant 12 re-grade this rule now governs. It is stated as a rule
+because the next round will face the same choice and should not have to re-derive
+it, and because the wrong answer is the cheap one. *(This paragraph said "the two
+criterion disputes this suite has had" until 2026-08-01, contradicting the
+maiden-round note's own count three sections up.)*
 
 > **A criterion may be narrowed only if the dropped clause was satisfiable by NO
 > fixture. If the clause was satisfiable and simply unmet, dropping it hides a
@@ -1312,6 +1336,40 @@ exception that qualifies for a patch under the stop rule; see run-conditions not
   red. These are why Plant 12 is still FAIL, and they are the fourth instance of
   the kit's recurring pattern: the patch is correct and leaves something adjacent
   unmechanised.
+
+**Re-checked against the shipped baits — 2026-08-01, from the code, not from this
+list.** The list above was written against the round-2 bait and has drifted; a
+count read off its bullets rather than the code shipped to the README that same
+day and was wrong in both directions at once — right total, wrong membership.
+Per item:
+
+- **`tenant_notes`: all three still present as written.** The module now lives at
+  `storage/db.py` (the substring test at `:42-43`); the benign-term boundary test
+  and the `config.py:5,10` fallbacks are unchanged. Present alongside them, logged
+  in the round-2 row and never absorbed into this list: the **`Db.insert()`** spine
+  gap — `storage/db.py:54-59` writes with a caller-supplied `tenant_id`, no
+  identity context, against `DESIGN.md`'s "no query touches a note except through
+  `Db.scoped()`".
+- **`tokenring`: the three listed defects are superseded by the v3 rebuild.** The
+  first two contradicted `DESIGN.md` sentences that were **deleted with `docs/`**
+  in the rebuild — `ci.yml:13` now runs `pip install -r requirements.txt`, and
+  there is no `DESIGN.md:32` left for the Makefile flags to disagree with. A
+  contradiction with a deleted document is not fixed; it is dissolved, and these
+  two leave the count as dissolutions, not repairs. The third **survives in
+  substance**: `conftest.py:12` now sets the signing key by direct assignment
+  rather than `setdefault`, so the refusal guard at `tokens.py:15-17` still has no
+  test that can go red — the mechanism changed, the gap did not, and no logged run
+  has examined the v3 form. Also open, logged in the v3 row and never in this
+  list: **`issue()`'s rule-7 gap** at `tokens.py:31-32` — the only validation is
+  the colon check, and `issue("")` still mints a token `verify()` resolves to a
+  falsy principal.
+- **Net, code-verified: six open defects — but not this list's six.** Four in
+  `tenant_notes` (the three listed, plus `insert()`), two in `tokenring`
+  (`issue()`, the untestable refusal guard), and zero of the three `tokenring`
+  bullets as written. The bullet sentence "these are why Plant 12 is still FAIL"
+  is doubly superseded: the v3 rebuild removed the defects it names, and the v4
+  re-grade made the plant PASS on a narrowed criterion. None of the six carries a
+  named remedy; all stay open under the stop rule below.
 
 ### Bait maintenance — the stop rule
 
