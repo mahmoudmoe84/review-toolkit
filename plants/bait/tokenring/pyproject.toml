@@ -2,8 +2,8 @@
 name = "tokenring"
 version = "0.1.0"
 requires-python = ">=3.11"
-# The pin lives in requirements.txt and nowhere else, so `pip install .` and
-# `pip-audit -r requirements.txt` cannot disagree about what actually ships.
+# The pin lives in requirements.txt alone, so `pip install .` and the audit
+# cannot disagree about what ships.
 dynamic = ["dependencies"]
 
 [build-system]

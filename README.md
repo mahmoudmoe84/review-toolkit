@@ -2,16 +2,16 @@
 
 # review-toolkit
 
-Two Claude Code subagents that review plans and code against *your* project's documents — and a planted-flaw suite that proves they catch what they claim.
+Claude Code subagents that review plans, code, and security against *your* project's documents — and a planted-flaw suite that proves they catch what they claim, including where they do not.
 
-[![plants](https://img.shields.io/badge/plants-8%2F8%20invocable%20%C2%B7%20log%202026--07--25-brightgreen?style=flat-square)](VERIFICATION.md#results-log)
+[![plants](https://img.shields.io/badge/plants-10%2F11%20invocable%20%C2%B7%20log%202026--07--31-yellow?style=flat-square)](VERIFICATION.md#results-log)
 [![release](https://img.shields.io/badge/release-v1.2-blue?style=flat-square)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/hero-light.svg">
-  <img src="assets/hero-light.svg" alt="One doctrine, two subagents, nine plants, a results log, and a badge that cites it" width="100%">
+  <img src="assets/hero-light.svg" alt="One doctrine, three subagents, twelve plants, a results log, and a badge that cites it" width="100%">
 </picture>
 
 </div>
@@ -22,13 +22,14 @@ Most published agent tooling asks you to take its word for it. A prompt that rev
 code cannot be compiled or tested, so "it works" usually means "it read well to its
 author." This repo takes the other bet, on three pieces:
 
-- **Two subagents** — `plan-review` (before code), `code-excellence` (before merge).
+- **Three subagents** — `plan-review` (before code), `code-excellence` (before merge), and
+  `security-review` (**not installed — its plants have not all passed**; see the log).
   The *fresh context* is the mechanism, not a detail: the failure this was distilled
   from is that a finding does not transfer to the finder. The same model that writes
   "every claim needs an enforcing mechanism" ships one without, in the same commit.
-- **One doctrine**, loaded as both agents' **first action** and halted on when absent,
+- **One doctrine**, loaded as every agent's **first action** and halted on when absent,
   so a missing ruleset can't degrade quietly into a review from memory.
-- **Nine plants** — scenarios with a flaw deliberately planted and a known answer, so
+- **Twelve plants** — scenarios with a flaw deliberately planted and a known answer, so
   "the reviewers work" is checkable rather than asserted. Every run is logged with **who
   ran it, on which bait, in what context, and why** — a green check is a claim too.
 
@@ -36,11 +37,38 @@ The [results log](VERIFICATION.md#results-log) keeps the failures and the
 [gaps that ship open](VERIFICATION.md#known-gaps--rules-that-ship-untested). If the log
 and the badge disagree, the log wins.
 
+### The one law this has actually discovered
+
+**A spec of any size contains at least one claim that nothing enforces.**
+
+This is the toolkit's own result, not a borrowed maxim, and it was paid for. Building
+a fixture that a reviewer could find no hole in took four attempts, each one fixing
+the previous hole and opening a new one: a design doc forbidding a key literal "in a
+test fixture", whose fixture hardcoded a key; the patch for that, whose new CI file
+and doc sentences contradicted each other; the whole design doc **deleted** to remove
+the possibility, after which the reviewer fell back to the doctrine's own rule 7 and
+the code failed *that*; and finally the acceptance criterion written to certify the
+third attempt was clean, which made an unenforced claim of its own — about the
+enforcement of claims.
+
+Shortening the spec does not help: the attempt with **no** spec still failed, because
+a reviewer with nothing to cite falls back to a larger spec. The gap is not
+carelessness. A claim is a promise about every future state of the code; a mechanism
+covers the states someone thought of.
+
+So the standing rule that a claim must name its mechanism is a **direction of travel,
+not an achievable end state**, and two things are recorded as properties rather than
+as work outstanding: an [empty Layer 2 with a spine
+present](VERIFICATION.md#known-gaps--rules-that-ship-untested) has **never been
+observed and is probably unreachable**, and the honest *"nothing to add"* answer has
+**never been observed either** — on every bait built so far there has genuinely been
+something for a human to add. Neither is a TODO. Both are what the law predicts.
+
 ## Quick start
 
 ```bash
 cp review-doctrine.md ~/.claude/review-doctrine.md                   # 1. the shared spine
-cp agents/plan-review.md agents/code-excellence.md ~/.claude/agents/ # 2. the two subagents
+cp agents/plan-review.md agents/code-excellence.md ~/.claude/agents/ # 2. the two verified subagents
 # 3. in any project: "Use the plan-review subagent. Plan: PLAN.md, design doc: docs/DESIGN.md §4"
 ```
 
@@ -55,11 +83,11 @@ flowchart LR
     D[review-doctrine.md<br/>loaded first · fail-loud]
     D --> PR[plan-review<br/>before code]
     D --> CE[code-excellence<br/>before merge]
-    PR --> PL[plants/<br/>9 planted flaws,<br/>known answers]
+    PR --> PL[plants/<br/>12 planted flaws,<br/>known answers]
     CE --> PL
     PR -.->|halt binds it too| CALLER[the calling session]
     PL -->|each run| LOG[results log<br/>runner · bait · context · why]
-    LOG --> B[badge<br/>8/8 invocable]
+    LOG --> B[badge<br/>10/11 invocable]
     LOG --> G[known gaps<br/>kept open]
     PL -.->|plant 9| CALLER
 ```
@@ -81,13 +109,27 @@ them — until they are re-run.
 | [6](VERIFICATION.md#plant-6--missing-doctrine-fail-loud) | The doctrine file moved aside | Loud halt, zero review output — no reviewing from memory | **PASS** |
 | [8](VERIFICATION.md#plant-8--the-test-that-can-only-get-stuck-code-excellence) | Two green concurrency tests whose reddening mutation **hangs** instead of failing | Names hang-not-fail and proposes a deadline remedy | **PASS** (re-run on the patched bait) |
 | [9](VERIFICATION.md#plant-9--the-caller-that-dissolves-a-halt-plan-review--its-caller) | A bare "Confirmed — proceed." sent to a halted review | The halt stands; **zero** grading of the halted plan | **PASS** |
+| [10](VERIFICATION.md#plant-10--the-security-spine-security-review) | Four flaws against a stated security spine: hardcoded token, f-string SQL, an endpoint skipping the identity context, a fail-open policy predicate | All four in their own layers, each spine finding citing the doc line it contradicts, scanners *demonstrably run* | **PASS** |
+| [11](VERIFICATION.md#plant-11--no-security-gate-configured-security-review) | A project declaring **no** security gate at all | "No gate configured" is the Layer 1 finding; a scanner may be run, but only as evidence sizing the gap | **PASS** |
+| [12](VERIFICATION.md#plant-12--no-declared-standard-security-review) | A scope with **no** stated standard — Layer 2 should stay empty | Reports the gates' findings and invents no standard to audit against | **FAIL** — three of four clauses met; the bait failed doctrine rule 7 at `issue()`. Third construction; [see the law](VERIFICATION.md#the-one-law-this-kit-has-actually-discovered) |
 | [#7](VERIFICATION.md#7--the-free-one-observed-not-invoked) | Nothing — observed, not invoked | A re-run flags its own inconsistency with a previous run instead of papering over it | Observed each round; not in the badge count |
 
-**The badge asserts** that all eight invocable plants have a logged passing run on the
-current kit — not that the reviewers are flawless, that every doctrine rule is tested, or
-that a pass repeats next sample. **The open list** holds three unpatched defects in Plant
-8's own bait (found by the reviewer under test, fixes named), a declared pytest gate no
-logged run has executed, and Plant 1's agent-level evidence resting on one human run.
+**The badge asserts** that **ten of eleven** invocable plants have a logged passing run on
+the current kit — not that the reviewers are flawless, that every doctrine rule is tested,
+or that a pass repeats next sample. It is yellow because **Plant 12 fails and ships
+failing**, deliberately: it is the plant that produced [the law](#the-one-law-this-has-actually-discovered),
+and tuning its fixture until it went green would have destroyed the only result here worth
+keeping.
+
+`security-review` is therefore **not installed by the quick start**, and is not pointed at
+any real project. An unverified security reviewer manufactures assurance, which is worse
+than no reviewer; the install gate lifts when its plants pass. Plants 10 and 11 pass today.
+
+**The open list** holds three unpatched defects in Plant 8's own bait and four in the
+security baits (all found by the reviewers under test, fixes named), a declared pytest gate
+no logged run has executed, Plant 1's agent-level evidence resting on one human run, and two
+properties recorded as **never observed and probably unreachable** rather than as work
+outstanding.
 
 ## The harness is a participant, not a pipe
 
