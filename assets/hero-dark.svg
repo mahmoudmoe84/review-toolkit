@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" role="img" aria-label="review-toolkit: one doctrine, three subagents, eleven invocable plants, a results log, and a badge that cites its date and its open gaps">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" role="img" aria-label="review-toolkit: one doctrine, three subagents, eleven invocable plants, a results log, and a badge that names its model, its date and its failures">
 <rect width="1000" height="300" rx="10" fill="#0d1117"/>
 <text x="40" y="42" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" font-weight="600" fill="#e6edf3">review-toolkit</text>
 <text x="176" y="42" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#9198a1">a claim, its mechanism, its evidence</text>
@@ -13,7 +13,7 @@
 <text x="286" y="101" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#58a6ff">three subagents</text>
 <text x="286" y="126" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#9198a1">plan-review · before code</text>
 <text x="286" y="146" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#9198a1">code-excellence · pre-merge</text>
-<text x="286" y="166" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#9198a1">security-review · opt-in</text>
+<text x="286" y="166" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#9198a1">code-security · opt-in</text>
 <rect x="500" y="70" width="200" height="132" rx="8" fill="#161b22" stroke="#30363d"/>
 <rect x="500" y="70" width="200" height="3" rx="1.5" fill="#d7ff64"/>
 <text x="516" y="101" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#d7ff64">12 plants</text>
@@ -32,8 +32,8 @@
 <path d="M489 131 l6 5 -6 5" fill="none" stroke="#6e7681" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
 <path d="M703 136 h20" stroke="#6e7681" stroke-width="1.5"/>
 <path d="M719 131 l6 5 -6 5" fill="none" stroke="#6e7681" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="40" y="232" width="288" height="30" rx="15" fill="#272115" stroke="#9e6a03"/>
-<text x="60" y="252" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" font-weight="600" fill="#d29922">plants 11/11 · 2 rules untested</text>
+<rect x="40" y="232" width="288" height="30" rx="15" fill="#2b1400" stroke="#ae5622"/>
+<text x="60" y="252" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" font-weight="600" fill="#f0883e">plants 9/11 · P6 FAIL: caller</text>
 <text x="342" y="247" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#9198a1">The badge is a coverage count with a date, not a grade — a green check is a claim too,</text>
 <text x="342" y="264" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#9198a1">so every row states who ran it, on which bait, and why it passed.</text>
 </svg>
