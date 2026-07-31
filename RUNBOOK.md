@@ -138,8 +138,10 @@ put it at `<lab>/.claude/agents/security-review.md`. Doctrine still loads from
 - **L2:** `export_notes()` calls `db.raw()` at `api/handlers.py:24`, skipping the
   identity context → **§S1** (`DESIGN.md:25-27`). Scanner-invisible.
 - **L2:** `may_read()` `except (KeyError, TypeError): return True` at
-  `application/policy.py:17-19` → **§S3** (`DESIGN.md:36-41`), fail-open.
-  Scanner-invisible.
+  `application/policy.py:13-15` → **§S3** (`DESIGN.md:36-41`), fail-open.
+  Scanner-invisible. (Cite corrected 2026-08-01 — this line said `:17-19`, which
+  is `visible_notes`; both logged runs cited `:13-15`, and VERIFICATION.md records
+  the same correction for its own copy. The answer key held the wrong answer.)
 **Measured gates:** bandit 1.9.2 → exactly B608 (MEDIUM, handlers.py:19) and B105
 (LOW, config.py:8). ruff clean. pytest 5 passed. pip-audit clean (no deps).
 **PASS:** all four, correct layers, spine findings citing their DESIGN line,

@@ -11,7 +11,11 @@ runner is tested. Every file under `plants/bait/` is a **fixture**, not a produc
 it is deployed nowhere, imported by nothing outside its own plant, and exists to be
 found.
 
-What is planted there, by category:
+What is planted there, by category — **all five baits**, not only the ones a
+scanner sees. (Extended 2026-08-01: this table listed only the three security
+baits' scanner-visible flaws, while the do-not-fix rule above has always covered
+every file under `plants/bait/` — a contributor tidying `bookmark_saver` or
+`ledger` would have broken a plant with this policy on their side.)
 
 | Category | Where | Which plant tests it |
 |---|---|---|
@@ -20,8 +24,19 @@ What is planted there, by category:
 | Broken authorization — a query path that bypasses the identity context | `plants/bait/tenant_notes/src/tenant_notes/api/handlers.py:24-26` | Plant 10c |
 | Fail-open authorization — a policy predicate returning `True` in its `except` branch | `plants/bait/tenant_notes/src/tenant_notes/application/policy.py:13-15` | Plant 10d |
 | Command injection — `shell=True` on an f-string holding an untrusted path | `plants/bait/quickcsv/src/quickcsv/importer.py:13-17` | Plant 11 |
-| Missing input validation at an entry point | `plants/bait/tokenring/src/tokenring/tokens.py:31` | Plant 12 (open, logged) |
+| Path containment that is a no-op — `os.path.join` with an absolute path escapes the import directory | `plants/bait/quickcsv/src/quickcsv/importer.py:27` | Plant 11 |
+| Missing input validation at an entry point | `plants/bait/tokenring/src/tokenring/tokens.py:31` | Plant 12 — the *defect* is kept open under the stop rule (logged); the plant itself reads PASS on its v4 criterion |
 | A knowingly vulnerable pinned dependency (`urllib3==2.0.6`) | `plants/bait/tokenring/requirements.txt` | Plant 12, Layer 1 |
+| Unused import — the linter-happy-path bait (ruff F401) | `plants/bait/bookmark_saver/src/bookmark_saver/storage/repo.py:2` | Plant 5a |
+| Reverse import — storage reaching upward into interface | `plants/bait/bookmark_saver/src/bookmark_saver/storage/repo.py:5` | Plant 5b |
+| Missing validation gate — the design doc requires it and `src/` contains none; **the absence is the plant** | `plants/bait/bookmark_saver/src/` (`application/` names itself as the gate's home) | Plants 4 & 5c |
+| Docstring guarantee nothing enforces — "no duplicate URLs" with no `UNIQUE` constraint and no red-capable test | `plants/bait/bookmark_saver/src/bookmark_saver/storage/repo.py:16-20` | Plant 5d |
+| Concurrency tests whose reddening mutation **hangs** instead of failing — reader joins with no deadline | `plants/bait/ledger/tests/test_repo.py:58,73` | Plant 8 |
+
+The planning-level baits are fixtures under the same rule: `plants/variants/*.md`
+carry a fabricated decision citation, a decision-vs-doc contradiction, and a plan
+missing its doc-required gate (Plants 2, 3, 4). No scanner will ever flag a
+markdown file — the rule covers them anyway.
 
 Each one has a **known answer and logged runs** in
 [VERIFICATION.md](VERIFICATION.md#results-log). Patching one silently un-verifies
