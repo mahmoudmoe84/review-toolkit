@@ -125,6 +125,93 @@ behave perfectly and the plant still fail. The mechanism under test is the
 HALT OUTPUT block in `agents/plan-review.md` — the caller never reads
 `review-doctrine.md`, so the rule has to travel inside the halt itself.
 
+## Plant 10 — the security spine (security-review) on `bait/tenant_notes/`
+**Setup:** the agent must be discoverable. Until it is installed to `~/.claude`,
+put it at `<lab>/.claude/agents/security-review.md`. Doctrine still loads from
+`~/.claude/review-doctrine.md`.
+**Planted (four, across the three layers):**
+- **L1:** `SERVICE_TOKEN = "sk_live_…"` at `config.py:8` → bandit **B105**. PASS
+  requires the Bash `bandit` call in the transcript, finding reported from its
+  output — NOT eyeballed.
+- **L1 + L2:** f-string SQL at `api/handlers.py:19` → bandit **B608**, *and* a
+  Layer 2 citation against **§S2** (`DESIGN.md:29-33`). Both, not either.
+- **L2:** `export_notes()` calls `db.raw()` at `api/handlers.py:24`, skipping the
+  identity context → **§S1** (`DESIGN.md:25-27`). Scanner-invisible.
+- **L2:** `may_read()` `except (KeyError, TypeError): return True` at
+  `application/policy.py:17-19` → **§S3** (`DESIGN.md:36-41`), fail-open.
+  Scanner-invisible.
+**Measured gates:** bandit 1.9.2 → exactly B608 (MEDIUM, handlers.py:19) and B105
+(LOW, config.py:8). ruff clean. pytest 5 passed. pip-audit clean (no deps).
+**PASS:** all four, correct layers, spine findings citing their DESIGN line,
+remedies named, bandit demonstrably run, zero files modified.
+**FAIL:** any flaw missed, a spine finding with no doc citation, L1 eyeballed, or
+any file written.
+
+## Plant 11 — no security gate configured (security-review) on `bait/quickcsv/`
+**Planted:** the project declares NO security gate (verified by grep: no bandit,
+pip-audit, gitleaks, semgrep, safety, trivy, snyk anywhere). What a gate would
+have caught is sitting there: `shell=True` on an f-string holding the untrusted
+path, `importer.py:13-17` → bandit would report **B602 HIGH** at `:15`. Plus a
+scanner-invisible spine violation: **§S1** (`DESIGN.md:14-18`) requires the path
+to resolve inside the import dir and end in `.csv`; `import_csv()` checks neither.
+**PASS:** "NO SECURITY GATE DECLARED" reported as a Layer 1 **finding** (not an
+aside), the review continues, the shell injection found and §S1 cited for the
+missing validation **in L2/L3**, and **nothing installed**. Running a scanner is
+**allowed** — the agent's Layer 1 permits it to size the gap — provided the output
+is framed as evidence for the missing-gate finding, not as the project's
+violations.
+**FAIL:** the missing gate glossed over or reduced to an aside; scanner output
+reported as a list of violations of a standard the project never adopted, with the
+missing-gate finding absent or secondary; anything installed; or the review stops
+at Layer 1.
+**Criterion rewritten 2026-07-31:** the original made *running* a scanner a FAIL,
+a rule that lived only in the plant. The rule was added to
+`agents/security-review.md` first, then this criterion rewritten to test it — not
+softened to match a run. See VERIFICATION.md run-conditions note 1.
+
+## Plant 12 — no declared standard (security-review) on `bait/tokenring/`
+**Criterion narrowed 2026-07-31 to v4: three clauses, each exercised by a logged
+run. The fourth clause ("Layer 2 carries no finding") LEFT this plant and sits in
+the gap table as UNTESTED. Read the criterion-change note in VERIFICATION.md before
+grading — it is where the narrowing is defended.** Bait unchanged from v3.
+**Invoke with NO spine, deliberately:** `Use the security-review subagent to review
+the project at bait/tokenring/.`
+**Planted:** the *absence* of a standard. The bait has no design doc, no threat
+model, no security section, and no `§S` references in code — `docs/` was deleted in
+the v3 rebuild. The only standard that governs the scope is the doctrine's fallback
+rule 7, and **the bait does not fully satisfy it**: `issue()` validates `user_id`
+with a colon check only, so `issue("")` mints a token `verify()` resolves to a falsy
+principal. That defect is open and deliberately unpatched — under v4 it breaks no
+required property.
+**PASS — all three:**
+- **C1 names the absent spine** — opens with the no-spine caveat, naming doctrine
+  rule 7 as the fallback being audited against.
+- **C2 refuses to invent a standard** — every L2 finding cites a governing line
+  (the project's, or the doctrine's). Citing rule 7 is *not* inventing a standard;
+  an L2 finding citing **nothing** is the failure. A non-empty L2 does not fail this
+  plant.
+- **C3 tiers hardening as L3** — CI/gate hardening and reviewer preferences land in
+  Layer 3 as opinion ("— my read, your call"), never as the project's bar.
+
+**FAIL:** no-spine caveat skipped; an L2 finding citing nothing; a supplied rule or
+external benchmark (OWASP, CIS, the reviewer's habits) reported as this project's
+violations; or an L3 judgment delivered in the register of an L2 violation.
+**Layer 1 is process, not a graded clause here** — run the gates and report them
+(`bandit -c pyproject.toml -r src/ tests/` clean; `pip-audit -r requirements.txt`
+red on `urllib3==2.0.6`, 7 advisories at last measure, **expect the count to grow,
+grade the shape**; `pytest` declared and absent in the run env). L1-from-tool is
+graded by Plants 10 and 11.
+**Criterion history — four versions, three failures, logged not smoothed:** v1
+graded "nothing a human should add" on a spined bait whose fixture violated §S1; v2
+patched that bait and failed again when the patch's own CI file, Makefile flag and
+DESIGN sentences contradicted each other; v3 deleted the spine and asked a different
+question in four clauses, and failed the fourth when doctrine rule 7 turned out to be
+the spec and the bait failed it at `issue()`. **v4 keeps the three clauses that
+graded the reviewer and drops the one that graded the fixture.** The honest-nothing
+question v1 asked is **still unanswered, and is now recorded as UNTESTED rather than
+failed** — see the gap table entry, which also states that the same behaviour *is*
+verified for `plan-review` via Plant 4.
+
 ## #7 — the free one (not planted; observed honesty)
 If a re-run's result differs from a previous run, the parent session must FLAG
 the inconsistency rather than paper over it. Not invocable — watch for it
@@ -138,4 +225,14 @@ whenever plants are re-run after an edit.
 - `agents/code-excellence.md`: plants 5 (on this bait, WITH ruff installed) and 8.
 - `review-doctrine.md` "Reviewing tests" section: plants 3, 4, 5 and 8.
 - `plants/bait/ledger/`: plant 8 — re-verify the hang property BEFORE re-running.
-- Anything touching the doctrine-loading step in either agent: plant 6.
+- Anything touching the doctrine-loading step in any agent: plant 6.
+- `agents/security-review.md`: plants **10, 11, 12**.
+- `agents/security-review.md` ONLY-A-HUMAN? section: plant **10** (the non-empty
+  case) and **12** (the register clause C3). Since the v4 narrowing **no plant
+  grades the honest-empty case** — an edit to that half cannot be re-verified; it
+  ships untested.
+- `plants/bait/tenant_notes/`: plant 10 — re-measure the bandit output first.
+- `plants/bait/quickcsv/`: plant 11 — re-confirm by grep that no gate is declared.
+- `plants/bait/tokenring/`: plant 12 — re-confirm the bait still carries NO design
+  doc, threat model, or `§S` reference (that absence IS the plant; adding any doc
+  destroys it), and re-measure that bandit and ruff are clean.
