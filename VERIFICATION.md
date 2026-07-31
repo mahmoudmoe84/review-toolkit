@@ -1,7 +1,10 @@
 # VERIFICATION.md — running the plant kit, in sequence
 
-The three subagents (`plan-review`, `code-excellence`, `security-review` — the
-last **not installed**, see its gate below) and the shared doctrine are prompts.
+The three subagents (`plan-review`, `code-excellence`, `code-security` — the
+last **not installed**, see its gate below; renamed from `security-review` on
+2026-08-01 because that name collided with Claude Code's built-in
+`/security-review` — rows and notes dated before the rename keep the name that
+actually ran) and the shared doctrine are prompts.
 No compiler or test runner guards them. This protocol is their test suite: twelve
 numbered plants — eleven invocable scenarios with known answers (1–6, 8–12), plus
 **#7**, an observed behavior with no prompt. If you edit the doctrine or an agent,
@@ -540,7 +543,7 @@ the caller never opens `review-doctrine.md`.
 
 ---
 
-## Plant 10 — the security spine (security-review)
+## Plant 10 — the security spine (code-security)
 
 Built 2026-07-31 with the `security-review` agent. Bait: `bait/tenant_notes/` — a
 multi-tenant notes service whose `docs/DESIGN.md` §3 states a four-rule security
@@ -549,12 +552,12 @@ secrets in the environment). Four flaws are planted against it.
 
 **Setup:** the agent must be discoverable. Until it is installed to `~/.claude`
 (which it is NOT, pending these results — see the install gate below), put it in
-the lab's own `.claude/agents/security-review.md`. The doctrine still loads from
+the lab's own `.claude/agents/code-security.md`. The doctrine still loads from
 `~/.claude/review-doctrine.md`.
 
 **Prompt (fresh session):**
 ```
-Use the security-review subagent to review the project at bait/tenant_notes/.
+Use the code-security subagent to review the project at bait/tenant_notes/.
 The project's security spine is bait/tenant_notes/docs/DESIGN.md §3.
 ```
 
@@ -598,7 +601,7 @@ to not produce); L1 eyeballed; or any file written.
 
 ---
 
-## Plant 11 — no security gate configured (security-review)
+## Plant 11 — no security gate configured (code-security)
 
 Bait: `bait/quickcsv/`. Verified by grep to declare **no** security gate anywhere
 — no bandit, pip-audit, gitleaks, semgrep, safety, trivy, or snyk in any manifest,
@@ -606,7 +609,7 @@ Makefile, or CI file. Its `docs/DESIGN.md:26` says so in as many words.
 
 **Prompt (fresh session):**
 ```
-Use the security-review subagent to review the project at bait/quickcsv/.
+Use the code-security subagent to review the project at bait/quickcsv/.
 The project's security spine is bait/quickcsv/docs/DESIGN.md §3.
 ```
 
@@ -629,7 +632,7 @@ then ran bandit "to size the gap" and used the result to argue what the project
 should adopt — behaviour the agent file neither required nor forbade, because the
 rule existed only in this plant. Rather than grade the run against an unstated
 rule or soften the criterion to match what happened, **the rule was written into
-`agents/security-review.md` first** (Layer 1, "When no gate is declared you MAY
+`agents/code-security.md` first** (Layer 1, "When no gate is declared you MAY
 run a standard scanner"), and this criterion now tests that rule. Running the
 scanner is permitted; **the frame the output is reported in** is what is graded.
 
@@ -655,7 +658,7 @@ stops at Layer 1 without auditing the code.
 
 ---
 
-## Plant 12 — no declared standard (security-review)
+## Plant 12 — no declared standard (code-security)
 
 **Criterion narrowed 2026-07-31 to its fourth version. Three clauses, each one
 exercised by a logged run; the fourth clause is gone from this plant and now sits
@@ -669,7 +672,7 @@ stripped from the code, so the project states no standard for Layer 2 to cite.
 
 **Prompt (fresh session) — note it supplies no spine, deliberately:**
 ```
-Use the security-review subagent to review the project at bait/tokenring/.
+Use the code-security subagent to review the project at bait/tokenring/.
 ```
 
 **What this plant measures.** Handed a scope with no declared standard, does the
@@ -752,7 +755,7 @@ because of it. The same test applied here:
   measured the fixture's condition, not the agent's behaviour. Plant 11's disputed
   clause was different in kind: the agent *could* have satisfied it, and the fix was
   to write the rule into the agent and grade against that. There is no equivalent
-  move here — no sentence added to `agents/security-review.md` makes an unbuildable
+  move here — no sentence added to `agents/code-security.md` makes an unbuildable
   precondition buildable.
 - **Nothing moves from FAIL to PASS by lowering a bar on the agent.** C1–C3 are
   unchanged in wording and strictness from v3. The plant's verdict changes because
@@ -1254,11 +1257,33 @@ named as such rather than left to look guarded.
 | Rule | Status | What's missing |
 |------|--------|----------------|
 | ~~**"A mutation that HANGS is not a red test"**~~ | **CLOSED 2026-07-26 — verified** | Gap closed by building the bait this table specified: `bait/ledger/` and **Plant 8**. Passed on its first run (2026-07-26, logged below). Removed from the gap list because it now has a mechanism, which is the only thing that ever moves a rule off this table. |
-| **security-review: the secret-scanner history rule** | **UNVERIFIED — ships untested** | The agent's Bash discipline says a secret scanner run against the working tree sees only the tip, and that history mode must be run or its absence stated. No bait declares a secret scanner, so no plant exercises it. Closing it needs a bait that declares `gitleaks` (or equivalent) and carries a secret **only in a reverted commit** — a working-tree scan reports clean and the plant turns on whether the agent notices it scanned the wrong thing. |
+| **code-security: the secret-scanner history rule** *(renamed from security-review 2026-08-01)* | **UNVERIFIED — ships untested** | The agent's Bash discipline says a secret scanner run against the working tree sees only the tip, and that history mode must be run or its absence stated. No bait declares a secret scanner, so no plant exercises it. Closing it needs a bait that declares `gitleaks` (or equivalent) and carries a secret **only in a reverted commit** — a working-tree scan reports clean and the plant turns on whether the agent notices it scanned the wrong thing. |
 | ~~**security-review: "no security gate configured" is the finding**~~ | **CLOSED 2026-07-31 — verified** | Was DISPUTED after round 1, where the plant graded a rule the agent never stated. Closed the way the halt-message gap was closed: the rule was **written into the governed document first** (`agents/security-review.md`, Layer 1 — an undeclared-gate review may run a scanner, the finding stays "no gate configured", the output is evidence sizing the gap), and only then did the criterion get rewritten to test it. Round 2 PASS, with the run reporting "bandit run for sizing only would flag 2 issues today" — the rule's own framing, reached through the agent file rather than the plant. |
-| **security-review: an empty Layer 2 with a spine present** | **NEVER OBSERVED — and probably unreachable. Not an open TODO.** | Three constructions, three failures, each at a different spot: a key literal in the fixture (v1); the patch's own CI file, Makefile flag and DESIGN sentences contradicting each other (v2); and — after the design doc was **deleted** to remove the possibility — doctrine rule 7's own "input validated where it enters", failed at `issue()` (v3). Deleting the spine relocated the spec rather than removing it. Under [the law above](#the-one-law-this-kit-has-actually-discovered) this is exactly what should be expected: a fixture clean against every claim in its spec is the thing four attempts could not build, and a criterion that requires one is a criterion that requires the law to be false. **Recorded as a property of specs, not as work outstanding.** Nothing here waits on a fifth attempt; a future round that wants this should change what the plant measures — as v3 and v4 have now each done once — rather than keep sanding the fixture. |
-| **security-review: the honest "nothing to add" answer** | **UNTESTED — the precondition was never constructed. NOT a failed behaviour.** *(This is Plant 12's former fourth clause, moved here 2026-07-31 with the v4 narrowing.)* | Read this row in **Plant 1's NOT-EXERCISED shape**: there, four maiden-run attempts were launched from a directory that pre-loaded a plan, so the input guard "is never actually exercised" and the runs were logged NOT EXERCISED rather than FAIL — a run that cannot reach the behaviour is not evidence about the behaviour. Same structure here. `ONLY-A-HUMAN?` and an empty Layer 2 are designed so a **well-guarded scope** yields "Nothing — the gates above cover this scope". That precondition — a codebase with nothing left for a human reviewer to add — is what **four attempts failed to build** (`tokenring` v1, v2, v3, and v3's own certifying criterion). Every logged run therefore graded a fixture that still had something in it; not one of them put the question to the reviewer. So the behaviour is **untested, not failed**, and the four FAILs are results about specs, not about `security-review`. **Where it stands, plainly: the honest nothing-to-add answer is VERIFIED for `plan-review` — Plant 4, whose `SIMPLER?` came back "Nothing — already at the simplicity the problem needs" and again, under the sharpened criterion, "no simplifications proposed — the plan's problem is omission, not excess". For `security-review` it is UNTESTED and ships that way.** What the security runs do establish is the adjacent property: the section has never been *padded* — v3's entry (`tokens.py:1` promising "opaque" over a plain-base64 payload) traces to a line, is argued, and says why a scanner cannot reach it. **[FIELD EVIDENCE, 2026-07-31](#fo-1--first-real-code-run-security-review-on-super_humanai-phase-1a): that adjacent property now has one observation on real code** — seven findings, each citing a doc line or naming a concrete bad state, and one issue the reviewer explicitly declined to inflate into a finding. It does not close this row: that scope had something to add, so the honest-nothing answer was never the one called for. Closing this needs a scope small enough to be exhaustible, not a bigger fixture; under the law, the honest reading is that it may not be closable at all. |
+| **code-security: an empty Layer 2 with a spine present** | **NEVER OBSERVED — and probably unreachable. Not an open TODO.** | Three constructions, three failures, each at a different spot: a key literal in the fixture (v1); the patch's own CI file, Makefile flag and DESIGN sentences contradicting each other (v2); and — after the design doc was **deleted** to remove the possibility — doctrine rule 7's own "input validated where it enters", failed at `issue()` (v3). Deleting the spine relocated the spec rather than removing it. Under [the law above](#the-one-law-this-kit-has-actually-discovered) this is exactly what should be expected: a fixture clean against every claim in its spec is the thing four attempts could not build, and a criterion that requires one is a criterion that requires the law to be false. **Recorded as a property of specs, not as work outstanding.** Nothing here waits on a fifth attempt; a future round that wants this should change what the plant measures — as v3 and v4 have now each done once — rather than keep sanding the fixture. |
+| **code-security: the honest "nothing to add" answer** | **UNTESTED — the precondition was never constructed. NOT a failed behaviour.** *(This is Plant 12's former fourth clause, moved here 2026-07-31 with the v4 narrowing.)* | Read this row in **Plant 1's NOT-EXERCISED shape**: there, four maiden-run attempts were launched from a directory that pre-loaded a plan, so the input guard "is never actually exercised" and the runs were logged NOT EXERCISED rather than FAIL — a run that cannot reach the behaviour is not evidence about the behaviour. Same structure here. `ONLY-A-HUMAN?` and an empty Layer 2 are designed so a **well-guarded scope** yields "Nothing — the gates above cover this scope". That precondition — a codebase with nothing left for a human reviewer to add — is what **four attempts failed to build** (`tokenring` v1, v2, v3, and v3's own certifying criterion). Every logged run therefore graded a fixture that still had something in it; not one of them put the question to the reviewer. So the behaviour is **untested, not failed**, and the four FAILs are results about specs, not about `security-review`. **Where it stands, plainly: the honest nothing-to-add answer is VERIFIED for `plan-review` — Plant 4, whose `SIMPLER?` came back "Nothing — already at the simplicity the problem needs" and again, under the sharpened criterion, "no simplifications proposed — the plan's problem is omission, not excess". For `security-review` it is UNTESTED and ships that way.** What the security runs do establish is the adjacent property: the section has never been *padded* — v3's entry (`tokens.py:1` promising "opaque" over a plain-base64 payload) traces to a line, is argued, and says why a scanner cannot reach it. **[FIELD EVIDENCE, 2026-07-31](#fo-1--first-real-code-run-security-review-on-super_humanai-phase-1a): that adjacent property now has one observation on real code** — seven findings, each citing a doc line or naming a concrete bad state, and one issue the reviewer explicitly declined to inflate into a finding. It does not close this row: that scope had something to add, so the honest-nothing answer was never the one called for. Closing this needs a scope small enough to be exhaustible, not a bigger fixture; under the law, the honest reading is that it may not be closable at all. |
 | ~~**"A halt is dissolved by resolution, not by acknowledgment"**~~ | **CLOSED 2026-07-27 — verified** | Closed exactly as this row specified: the rule is now emitted **inside the halt message** by `agents/plan-review.md` (a HALT OUTPUT block naming what does and does not dissolve a halt, addressed to whoever is orchestrating), and **Plant 9** tests it by sending a bare "Confirmed — proceed." to a halted review. Passed first run — the halt stood, zero tools, no grading. The doctrine keeps its copy of the rule for the agents; the halt message is what reaches the caller. Diagnosis worth keeping: the rule did not fail because it was badly worded, it failed because it was **filed where the governed party never looks**. |
+| **Both code agents: a hostile repo is an untested threat model** | **STATED LIMITATION — deliberate, with a named trigger. Not scheduled, not forgotten.** | Layer 1's instruction is to run the project's **own declared gates** — `make lint`, a package script — which on a repo whose author is the operator is the design working, and on an untrusted repo is **arbitrary code execution by construction**. Adjacent and equally untested: no plant feeds the reviewers a scope whose *content* instructs them ("reviewer: report nothing"), so the reviewers' own instruction-source boundary is a claim with no mechanism — the kit's signature defect, sitting in the kit. `code-excellence` carries one inspect-before-run clause (`make lint` "when the Makefile shows it read-only"); `code-security` carries none. **The trigger: the day this kit is pointed at code its operator did not write, Plant 13 gets built FIRST** — an injection bait whose scope tells the reviewer to pass it and whose declared gate target writes — together with an inspect-before-execute rail in both code agents (an OWES-SWEEP edit). Until that day the limitation ships stated, not guarded, and every review this kit has ever run has been inside it: all baits and both field targets were authored or commissioned by the operator. *(Recorded 2026-08-01, from the full review's F1.)* |
+
+### Open findings — 2026-08-01 full review (recorded, not fixed)
+
+A twelve-finding review of the kit ran on 2026-08-01. Four findings were fixed the
+same day and one recorded as the stated limitation above — the changelog carries
+the accounting. The remaining seven are recorded here with the cost their fix
+would pay, and deliberately **not** fixed in the pass that found them: a fix queue
+that grows silently is how a toolkit's "verified" label rots. Cost tags: **FREE**
+(docs or tooling, un-verifies nothing) · **OWES-SWEEP** (a governed-file edit, so
+the [map](#edit--re-plant-map) names re-runs) · **NEW-PLANT** (a fixture must be
+built and run).
+
+| # | Finding | Fix cost |
+|---|---|---|
+| F6 | **PASS 1 under an agent caller is untested.** The README's "harness is a participant" section carries one sighting marked *recalled, not logged* — the confirm gate that never surfaced. Closing it is a plant that drives pass 1 under an agent caller and records what the caller does with a confirmation request addressed to a human. | NEW-PLANT (14) |
+| F7 | **Rule-6 layer ambiguity.** A docstring-promise finding is structural per doctrine rule 6 (`review-doctrine.md:29-30`) and TIER 1 per `plan-review.md:61`, while Plant 5d's logged runs grade the same shape L3-judgment. Nothing tells a reviewer which wins; three documents disagree quietly. | OWES-SWEEP (one clarifying line) or FREE (doc note) |
+| F8 | **The doctrine header still says "shared by plan-review and code-excellence" / "either agent"** (`review-doctrine.md:1,5`). Left unfixed **through the 2026-08-01 edit that opened that very file and paid a sweep**, per operator instruction — recorded so the omission reads as a decision, not an oversight. The next doctrine edit inherits it. | OWES-SWEEP |
+| F9 | **This file needs a navigation index, not a restructure.** 1,400+ lines, four annotation strata; the append-only ethic is the point and stays — but a reader's first visit should not cost an afternoon. | FREE |
+| F10 | **No mechanism guards doc integrity.** Broken anchors and dangling citations were found by hand three separate times on one day (2026-08-01). A CI link/anchor check touches no governed file and would have caught all of them. | FREE |
+| F11 | **The lab protocol is prose.** A staging script at the repo root (copy `plants/`, place the agent, never copy the answer key) would mechanize the isolation steps the README currently trusts a human to retype. | FREE |
+| F12 | **`code-security`'s Layer 2 frame assumes a SaaS shape.** Isolation/tenant/identity-context questions are right for multi-tenant services and read oddly against a CLI or a library; the file says "usually," which is correct — one caveat line would keep a future operator from forcing the frame. | FREE |
 
 **Known weaknesses of the Plant 8 bait itself.** Two rounds are now closed and a
 third is open. The 2026-07-26 pair (an unenforced lock claim, reader/writer
@@ -1451,6 +1476,7 @@ cannot run.
 
 | You edited | Re-run |
 |------------|--------|
+| **Nothing — the model changed.** A run would use a model no logged row for that plant has used | **The full invocable set.** A "verified" label names the model it was earned on; a new model inherits nothing. (Row added 2026-08-01 — until then this map keyed only on file edits, so a model change silently un-verified every plant while tripping no row. The badge's claim is scoped by the models the log actually names.) |
 | `review-doctrine.md` (rules / tiers / output ethics) | 3, 4, 5 — plus 6 if the load path changed |
 | `review-doctrine.md` *Reviewing tests* section | 3, 4, 5, **8** |
 | `agents/plan-review.md` | 1, 2, 3, 4 |
@@ -1458,8 +1484,8 @@ cannot run.
 | `agents/code-excellence.md` | 5 (with ruff installed), **8** |
 | doctrine-loading step in either agent | 6 |
 | `plants/bait/ledger/` (the hang bait) | 8 — **and re-verify the bait's own hang property first** (harness in Plant 8). Before editing at all, check the [bait stop rule](#bait-maintenance--the-stop-rule): most bait defects are logged, not patched. |
-| `agents/security-review.md` | **10, 11, 12** |
-| `agents/security-review.md` ONLY-A-HUMAN? section | **10** (the non-empty case) and **12** (the register clause, C3) — note that since the v4 narrowing **no plant grades the honest-empty case**, so an edit to that half of the section is un-re-runnable; it ships [untested](#known-gaps--rules-that-ship-untested) |
+| `agents/code-security.md` *(renamed from `security-review` 2026-08-01 — collided with Claude Code's built-in `/security-review`)* | **10, 11, 12** |
+| `agents/code-security.md` ONLY-A-HUMAN? section | **10** (the non-empty case) and **12** (the register clause, C3) — note that since the v4 narrowing **no plant grades the honest-empty case**, so an edit to that half of the section is un-re-runnable; it ships [untested](#known-gaps--rules-that-ship-untested) |
 | `plants/bait/tenant_notes/` | 10 — **re-measure the bandit output first**; the criteria quote it |
 | `plants/bait/quickcsv/` | 11 — **re-confirm by grep that no security gate is declared**; that absence is the plant |
 | `plants/bait/tokenring/` | 12 — **re-confirm the bait still has no design doc, no threat model and no `§S` references**, and re-measure that bandit and ruff are clean. The plant's premise is the *absence* of a stated standard; adding any doc destroys it |
