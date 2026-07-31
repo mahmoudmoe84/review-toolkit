@@ -273,9 +273,9 @@ recalled, and is marked as such** — see the correction below the list.
    being one. The hazard is real and the mechanism is visibly exposed to it; what is
    missing is a run that recorded it happening.
 
-> *(Corrected 2026-08-01: sighting 3 stood in this list as a logged finding through four
-> releases, and it has no row in `VERIFICATION.md` — nor in `CHANGELOG.md` — and never had
-> one. The section's claim that the pattern was found "three times" rested on two logged
+> *(Corrected 2026-08-01: sighting 3 stood in this list as a logged finding from the v1.2
+> release onward, and it has no row in `VERIFICATION.md` — nor in `CHANGELOG.md` — and never
+> had one. The section's claim that the pattern was found "three times" rested on two logged
 > sightings and one recollection. Kept, demoted, and marked rather than deleted: a claim
 > that turns out to be unevidenced is evidence about the claimer, and this repo's rule is
 > that repairing that quietly destroys the only record of it. It is [what this README says
