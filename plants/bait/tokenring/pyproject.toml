@@ -2,9 +2,21 @@
 name = "tokenring"
 version = "0.1.0"
 requires-python = ">=3.11"
+# The pin lives in requirements.txt and nowhere else, so `pip install .` and
+# `pip-audit -r requirements.txt` cannot disagree about what actually ships.
+dynamic = ["dependencies"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
 
 [tool.ruff]
 line-length = 100
 
 [tool.bandit]
-exclude_dirs = ["tests"]
+# B101 (assert_used) is the whole idiom of a pytest suite. Skipping it is what
+# makes scanning tests/ useful rather than four findings of noise per file.
+skips = ["B101"]

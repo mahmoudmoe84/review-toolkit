@@ -29,8 +29,15 @@ recover a signature one byte at a time from response timing.
 
 ## 4. Gates
 
-`make security` runs `bandit -r src/` and `pip-audit -r requirements.txt`.
-`make check` runs `ruff check .`.
+`make security` runs `bandit -c pyproject.toml -r src/ tests/` and `pip-audit -r requirements.txt`.
+`make check` runs `ruff check .` and `pytest -q`. CI runs both on every push
+(`.github/workflows/ci.yml`); neither is a target a human has to remember.
+
+bandit scans `tests/` as well as `src/` because §S1 forbids a key literal in a
+fixture — a gate that skipped `tests/` would be blind to half the rule it exists
+to enforce. The dependency pin lives in `requirements.txt` alone, and
+`pyproject.toml` reads it from there, so what `pip-audit` audits is what
+`pip install .` installs.
 
 ## 5. Out of scope
 

@@ -72,6 +72,25 @@ project is currently caught by nobody. Report it as a Layer 1 finding, name the
 gate the project should declare, and continue the review. A declared gate that is
 missing, errors, or cannot run here → also a finding; say which, and continue.
 
+**When no gate is declared you MAY run a standard scanner** — bandit, pip-audit,
+gitleaks, or the ecosystem's equivalent — to size the gap. Never install one to do
+it; if none is already available, say so and move on.
+
+What comes back is **evidence, not a verdict**. The finding remains *"no security
+gate configured"*, and the scanner's output is the measure of what that costs:
+report it as "a declared `<tool>` gate would flag N issues today, at
+`<file:line>`". Do **not** report those lines as the project's violations. The
+project holds no such standard — nobody adopted this tool, its rule set, or its
+severity thresholds — and grading code against a rule its authors never agreed to
+is the same error as inventing a spine rule and citing it. It also buries the
+finding that matters: a list of tool output reads as the review's substance, when
+the substance is that nothing here runs any of it.
+
+A genuine defect the scanner points you at is still yours to report — but report
+it where it belongs, in Layer 2 against the spine it contradicts, or in Layer 3 as
+a judgment you argue. Not as a Layer 1 violation of a gate the project does not
+have.
+
 ## LAYER 2 — SPINE-DRIVEN
 Audit the scope against the loaded spine. **Every finding cites the doc line the
 code contradicts** — `DESIGN.md:31` (§S2, "queries are parameterized") vs

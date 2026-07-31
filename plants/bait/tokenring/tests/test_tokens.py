@@ -1,10 +1,4 @@
-import os
-import sys
-
-os.environ.setdefault("TOKENRING_SIGNING_KEY", "test-key-not-a-real-secret")
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from tokenring.tokens import issue, verify  # noqa: E402
+from tokenring.tokens import issue, verify
 
 
 def test_a_fresh_token_verifies():
