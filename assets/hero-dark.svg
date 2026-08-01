@@ -33,7 +33,7 @@
 <path d="M703 136 h20" stroke="#6e7681" stroke-width="1.5"/>
 <path d="M719 131 l6 5 -6 5" fill="none" stroke="#6e7681" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
 <rect x="40" y="232" width="288" height="30" rx="15" fill="#272115" stroke="#9e6a03"/>
-<text x="60" y="252" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" font-weight="600" fill="#d29922">plants 10/11 · P1 short (F14)</text>
+<text x="60" y="252" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" font-weight="600" fill="#d29922">plants 11/11 · 3 rules untested</text>
 <text x="342" y="247" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#9198a1">The badge is a coverage count with a date, not a grade — a green check is a claim too,</text>
 <text x="342" y="264" font-family="ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#9198a1">so every row states who ran it, on which bait, and why it passed.</text>
 </svg>

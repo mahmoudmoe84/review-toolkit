@@ -4,7 +4,7 @@
 
 Claude Code subagents that review plans, code, and security against *your* project's documents — and a planted-flaw suite that makes "they catch what they claim" checkable rather than asserted, including where they do not.
 
-[![plants](https://img.shields.io/badge/plants-10%2F11%20on%20fable--5%20%C2%B7%20P1%20short%20(F14)%20%C2%B7%20log%202026--08--01-yellow?style=flat-square)](VERIFICATION.md#results-log)
+[![plants](https://img.shields.io/badge/plants-11%2F11%20on%20fable--5%20%C2%B7%203%20rules%20untested%20%C2%B7%20log%202026--08--01-yellow?style=flat-square)](VERIFICATION.md#results-log)
 [![release](https://img.shields.io/badge/release-v1.2%20%C2%B7%20unreleased%20work%20on%20main-blue?style=flat-square)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -171,7 +171,7 @@ them — until they are re-run.
 
 | # | What it plants | PASS means | Status |
 |---|---|---|---|
-| [1](VERIFICATION.md#plant-1--input-guard) | A bare invocation: no plan, no doc, no decisions | Refuses to review and names all three missing inputs — [criterion made precise 2026-08-01](VERIFICATION.md#plant-1--input-guard) after three near-misses in three shapes | **PASS on opus-5** (system-level; agent-level rests on one human run). On fable-5: **short of pass twice** (2-of-3, then 1½-of-3 inputs named) — a **measured pattern, not accidents**: the caller answers instead of dispatching, and cannot name a contract that lives in a file it never reads. That structural cause is [F14](VERIFICATION.md#open-findings--2026-08-01-full-review-recorded-not-fixed), with its fix and owed sweep named |
+| [1](VERIFICATION.md#plant-1--input-guard) | A bare invocation: no plan, no doc, no decisions | Refuses to review and names all three missing inputs — [criterion made precise 2026-08-01](VERIFICATION.md#plant-1--input-guard) | **PASS** (fable-5, 2026-08-01, round 4 — **the first full parent-layer pass in the plant's history**). Four agent-driven samples named subsets because the input contract lived in a file the caller never reads; [F14](VERIFICATION.md#open-findings--2026-08-01-full-review-recorded-not-fixed) moved it into the frontmatter description — the one surface the harness shows the caller — and the next sample **recited all three inputs from it**. The caller never changed; the contract's address did. Agent-level doctrine-load evidence still rests on the 2026-07-20 human run |
 | [2](VERIFICATION.md#plant-2--unagreed-claim) | A plan step resting on "decision 6" of a 5-decision list | Catches the fabricated citation | **PASS** |
 | [3](VERIFICATION.md#plant-3--decision-vs-doc-contradiction) | A confirmed decision contradicting the design doc | BLOCKING halt, zero steps graded, winner left to the human | **PASS** |
 | [4](VERIFICATION.md#plant-4--missing-doc-requirement--honest-simpler) | A save flow with the doc's required validation gate missing | BLOCKING citing the doc §, remedy in the doc-named layer, SIMPLER? answered honestly | **PASS** |
@@ -187,19 +187,24 @@ them — until they are re-run.
 **The badge asserts** that **eleven of eleven** invocable plants have a logged passing run on
 the current kit *and the model the log names* — not that the reviewers are flawless, that
 every doctrine rule is tested, or that a pass repeats next sample. **On claude-fable-5,
-after two same-day sweeps: ten of eleven pass; Plant 1 ships short of pass, twice, for a
-stated structural reason ([F14](VERIFICATION.md#open-findings--2026-08-01-full-review-recorded-not-fixed)).**
-The day's story is the kit's whole thesis run at speed: the first sweep **FAILED Plant 6** —
-the agent refused doctrine-free exactly as specified, and the *driving session* repaired the
-deliberate absence, symlinking the repo's doctrine into `~/.claude` and re-running, because
-the refusal message carried no caller-facing block. The fix was Plant 9's pattern applied to
-the refusal — the rule travels in the OUTPUT — landed as **the only agent edit in its own
-batch**, and the owed re-sweep ran the same evening: **the same caller class quoted the new
-block verbatim and declined to repair.** Morning FAIL, evening PASS, one mechanism between
-them; F13 found, built, and verified inside a day, [struck on the open list the way the
-halt-dissolution row was](VERIFICATION.md#open-findings--2026-08-01-full-review-recorded-not-fixed).
+after four same-day sweeps: eleven of eleven, with three rules shipping untested** — the
+secret-scanner history rule, the honest nothing-to-add answer, and SAFE MODE's own refusing
+branch ([F15](VERIFICATION.md#open-findings--2026-08-01-full-review-recorded-not-fixed)),
+born the same day as the mechanism it belongs to. Yellow is the honest colour for that.
+
+**The day's story is the kit's law run three times at speed.** *A rule that governs the
+caller must reach the caller through OUTPUT* now has three independently built, same-day
+verified instances: the **halt rule** (Plant 9's relocation, holding on a new model —
+"binds me as orchestrator too"); the **doctrine-repair rule** (Plant 6 FAILED in the
+morning — the driving session symlinked the deliberately missing doctrine back into place —
+and passed by evening once the refusal carried a caller-facing block: same caller class,
+one relocated rule between FAIL and PASS); and the **input contract** (four Plant 1
+samples named subsets of inputs the caller had no way to see; [F14](VERIFICATION.md#open-findings--2026-08-01-full-review-recorded-not-fixed)
+moved the contract into the frontmatter description, and the fifth sample recited all
+three). Each fix was the only agent edit in its batch; each owed sweep ran once, unfixed
+FAILs and all; each closure is struck on the open list with its original finding kept.
 The prior full-green state — 11/11, log 2026-07-31 — remains true **of opus-5**: the badge
-is per-model now, which is what the model-change row exists to say.
+is per-model, which is what the model-change row exists to say.
 
 Plant 12's caveat stands: its PASS is on a criterion **narrowed from four clauses to
 three**, not a fixture finally built clean — and the 2026-08-01 run passed the same three
@@ -351,7 +356,11 @@ the tool list, so "never edits" is a harness-level guarantee rather than a promi
 prompt. **Bash is granted** — these agents run your linters, your scanners and read-only
 `git` on your machine — and *that* restraint is prose discipline in the agent file, not a
 tool boundary: never install anything, never `--fix`, never write a baseline or allowlist,
-never a state-changing git command.
+never a state-changing git command. **And the gates run only on your word** (SAFE MODE,
+2026-08-01): a project's declared gate is the project's own code, so unless your invocation
+states you own or trust the scope, Layer 1 reports the gates without executing them and
+Layers 2–3 proceed read-only. The refusing branch is itself
+[untested until Plant 15 exists](VERIFICATION.md#open-findings--2026-08-01-full-review-recorded-not-fixed).
 
 **`code-security`** *(renamed from `security-review` 2026-08-01; not installed by the quick
 start — see the badge section)* — the
@@ -421,15 +430,24 @@ for a reason that has nothing to do with the reviewer. (`gitleaks` is *not* need
 declares a secret scanner, which is exactly why that rule is one of the two shipping
 untested.)
 
-**The rails ride along as a mechanism now, not just as prose.** `plants/.claude/settings.json`
-travels with the `cp -R`, so every lab enforces deny rules for the three promises the agent
-prompts make — never install, never `--fix` or format, never a state-changing git command —
-at the harness level, with no step anyone can forget. Stated honestly, the way this repo
-states things: prefix deny rules are a **tripwire, not a sandbox**. A chained or re-spelled
-command can evade them, so the prompt rails stay primary and the read-only outcome check
-(tree hash before and after a run) stays the verification. The mechanized layer catches the
-routine violation, which is the common one. (Added 2026-08-01 — before that, all three
-promises were prose in the agent files, which is the exact defect this kit exists to catch.)
+**The rails are a mechanism *here*, and prose everywhere else.** `plants/.claude/settings.json`
+travels with the `cp -R`, so every **lab** enforces deny rules for the three promises the
+agent prompts make — never install, never `--fix` or format, never a state-changing git
+command — at the harness level, with no step anyone can forget. **In any other repository
+those same three promises are back to being prose in the agent files, unless you copy that
+settings file into the target repo yourself** — the second-line step in
+[SECURITY.md's untrusted-review procedure](SECURITY.md#reviewing-code-you-do-not-own).
+Stated honestly, the way this repo states things: prefix deny rules are a **tripwire, not a
+sandbox**. A chained or re-spelled command can evade them, so the prompt rails stay primary
+and the read-only outcome check (tree hash before and after a run) stays the verification.
+The mechanized layer catches the routine violation, which is the common one.
+
+*(Corrected 2026-08-01: this paragraph said the rails ride along "with no step anyone can
+forget," full stop — true of the plant lab, and an overclaim everywhere else, written the
+same day three agents were installed for real use where no such file exists. Same pattern
+this page keeps catching in itself: a mechanism verified in one scope, described as though
+it covered every scope. Added the same day — before that, all three promises were prose in
+the agent files, which is the defect this kit exists to catch.)*
 
 Protocol, prompts, criteria and log: [VERIFICATION.md](VERIFICATION.md). The answer key,
 [RUNBOOK.md](RUNBOOK.md), stays at the repo root and never inside `plants/`, so it cannot

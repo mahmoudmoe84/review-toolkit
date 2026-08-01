@@ -118,6 +118,35 @@ weight, and the pre-rename `security-review.md` removed from the operator's
 `~/.claude` (two names for one agent being the drift this kit warns about).
 Badge: **10/11 on fable-5, yellow, P1 short (F14)**.
 
+### SAFE MODE, same day — the half of F1's remedy that hadn't landed
+
+The operator's check caught that F1 shipped as disclosure only: the published
+kit still executed untrusted gates by default. SAFE MODE landed as the next
+single-edit batch (both code agents): **gates run only on the invoker's stated
+ownership or trust**; unconfirmed scopes get report-only Layer 1 ("declared,
+not executed") with Layers 2–3 read-only. The five gate-running plants' prompts
+gained the trust line so they keep testing the running path — which creates the
+refusing branch as a new untested claim, filed the same day as **F15**
+(NEW-PLANT, criterion drafted). The owed sweep {5, 8, 10, 11, 12} ran once:
+**5 PASS, zero FAIL**, and with it the last of the old pytest condition closed —
+every declared suite has now executed under a reviewer, `tenant_notes` and
+`tokenring` for the first time. Badge unchanged at 10/11 yellow.
+
+### F14, same day — the third relocation, and 11/11 on fable-5
+
+The input contract moved into `plan-review`'s frontmatter description (the one
+surface the harness shows a calling session), the only edit in its batch, with
+the law named in the file: the caller-side halt rule, the doctrine-repair rule,
+and now the input contract each had to move into what the caller actually reads.
+The owed sweep {1, 2, 3, 4} ran once: **4 PASS, including Plant 1's first full
+parent-layer pass ever** — the fifth agent-driven sample, and the first that
+could read the contract, recited all three inputs from it. Badge: **11/11 on
+fable-5, yellow, three rules untested** (secret-scanner history, honest
+nothing-to-add, and F15 — SAFE MODE's refusing branch). Also this span, on the
+operator's instruction: `code-security` installed to `~/.claude/agents/`
+user-level — the human install decision the README defers to, made and hash
+logged.
+
 ### Owed and open, carried forward
 
 - `review-doctrine.md` still opens "shared by `plan-review` and

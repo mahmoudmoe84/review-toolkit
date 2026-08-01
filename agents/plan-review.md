@@ -5,7 +5,10 @@ description: >
   design doc / PRD section it claims to serve — BEFORE code. Fresh context on
   purpose. Two-pass: pass 1 extracts decisions for human confirmation; pass 2
   reviews against the confirmed list. Judges intent and design shape only — never
-  implementation detail. Names issues; never edits.
+  implementation detail. Names issues; never edits. REQUIRES THREE INPUTS, and a
+  bare invocation must be refused naming each: (1) THE PLAN; (2) THE DESIGN DOC /
+  PRD section it serves, or "none exists"; (3) planning notes (pass 1) or a
+  human-confirmed decision list (pass 2).
 tools: Read, Grep, Glob
 ---
 
@@ -39,6 +42,11 @@ after the code exists.
 - ONE OF: planning conversation/notes (→ PASS 1) | a human-CONFIRMED decision list
   (→ PASS 2).
 If an input is missing, name it and stop.
+(The three inputs are ALSO enumerated in the frontmatter description above, on
+purpose: the description is the one surface the harness shows a calling session,
+and this file's body is not. Third instance of the same law — the caller-side
+halt rule, the doctrine-repair rule, and now the input contract each had to move
+into what the caller actually reads before the caller could follow it.)
 
 ## Rules loading (before PASS 2)
 Read the project's stated architecture rules (CLAUDE.md boundary rules or the design

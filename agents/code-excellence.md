@@ -40,6 +40,9 @@ code CONTRADICTS the approved plan, that is DRIFT — report it, do not redesign
   for one logical change.)
 - THE APPROVED PLAN (optional): when provided, also check the code implements it and
   nothing beyond — deviations are DRIFT findings, cited against the plan step.
+- SCOPE TRUST: the declared gates are the project's own commands, so they run
+  only on the invoker's word. If the invocation does not state that the human
+  owns or trusts this scope, review in SAFE MODE (Layer 1 below).
 If SCOPE is missing, stop.
 
 ## Rules loading
@@ -58,7 +61,17 @@ run — the human runs it.
 ## LAYER 1 — MECHANICAL
 Run the project's OWN gates, not an assumed tool. Discover them from the project's
 manifests — CLAUDE.md, pyproject.toml, package.json, Makefile, or equivalent — and
-run the declared linter/checker in check-only mode on the scope. NAME exactly what
+run the declared linter/checker in check-only mode on the scope.
+
+**SAFE MODE — when scope ownership is unconfirmed.** Running a project's declared
+gate is running the project's code: a Makefile target or package script executes
+whatever the repo's author wrote there. If the invoker has NOT stated that the
+human owns or trusts this scope, execute nothing the project declares. Layer 1
+becomes **report-only**: discover the gates, read what each would run, and report
+them as *declared, not executed — scope ownership unconfirmed*, quoting the
+command you would have run. Say so up front, on the line after DOCTRINE:
+**"SAFE MODE — scope ownership unconfirmed: declared gates reported, not
+executed."** Layers 2 and 3 proceed unchanged — they read; they do not run. NAME exactly what
 you ran and paste its real output (grouped, with counts) — never summarize from
 memory of "what that tool usually says". Do NOT eyeball for unused imports / dead
 code / style — the linter beats you at this; re-deriving it wastes judgment and
