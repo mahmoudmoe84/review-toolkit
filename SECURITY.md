@@ -71,6 +71,70 @@ None of these alerts indicates an exposure. Nothing in `plants/bait/` is deploye
 nothing there holds a real credential, and no package is published from this
 repository.
 
+## Reviewing code you do not own
+
+These reviewers **execute the reviewed project's own commands**. Layer 1's whole
+design is to run the gates the project declares rather than gates the agent
+assumes — `make lint`, a package script, the security target — and a declared
+gate is a line someone else wrote. On a repository you authored that is the
+feature. On a repository you did not, it is arbitrary code execution with your
+credentials, triggered by a file in the tree.
+
+Two lines of defence, in order. They answer different failure modes, and the
+second is not a substitute for the first.
+
+**First line — SAFE MODE, automatic, no setup.** `code-excellence` and
+`code-security` execute nothing the project declares unless your invocation
+states that you own or trust the scope. Say nothing about trust and Layer 1
+becomes report-only: gates discovered, each one named with the command it *would*
+have run, announced as `SAFE MODE — scope ownership unconfirmed: declared gates
+reported, not executed`. Layers 2 and 3 still deliver — they read, they do not
+run. **The correct way to review a stranger's repository is to not say the
+trust line.** Nothing to install, nothing to remember.
+
+**Second line — the deny rules, for a trust call you made and got wrong.** Safe
+mode keys off your word. If you said "I own this code" about a repository whose
+contents you had not actually read, safe mode steps aside and the prompt rails
+are all that remain. Before that review, copy the kit's rules into the target:
+
+```bash
+mkdir -p /path/to/target-repo/.claude
+cp plants/.claude/settings.json /path/to/target-repo/.claude/settings.json
+```
+
+Same file the plant lab uses; nothing in it is lab-specific.
+
+**What it buys.** Harness-level `deny` rules on the routine forms of the three
+promises the agent prompts make — package installs (`pip`, `npm`, `yarn`, `pnpm`,
+`brew`, `uv`, `pipx`), formatters and `--fix` invocations, and state-changing git
+(`commit`, `push`, `reset`, `checkout`, `clean`, `stash`, `apply`, …). It is
+enforced by the harness before the command runs, not by the model's compliance —
+verified 2026-08-01: a `pip install` was denied in a lab session running under
+`bypassPermissions`, the mode that skips prompts.
+
+**What it does not buy, stated plainly.**
+
+- **It is prefix matching, not a sandbox.** `sh -c "pip install x"`, a wrapper
+  script, an unusual spelling, or a Makefile target that shells out to any of the
+  above will pass straight through. Treat it as a tripwire for the ordinary
+  mistake, never as containment.
+- **It does not stop the gate itself.** If you authorised execution, the
+  project's declared command still runs, and everything that command does — file
+  writes, network calls, whatever its author put there — is outside these rules.
+- **It does nothing about content injection.** Hostile text inside the reviewed
+  files, aimed at steering the reviewer's judgment rather than its shell, is a
+  separate and [openly untested threat
+  model](VERIFICATION.md#known-gaps--rules-that-ship-untested) — no plant exercises
+  it, and no rule here touches it.
+- **Neither line has ever been exercised on genuinely hostile code.** Every
+  review this kit has logged was on code its operator authored or commissioned.
+  Safe mode's refusing branch is itself untested (**F15**): every plant prompt
+  states trust, so no logged run has watched it decline.
+
+Do not install these rules into `~/.claude` to cover everything at once unless
+you have decided you want them in every project you touch — a user-level deny
+list will also block the legitimate `pip install` in unrelated work.
+
 ## Reporting a real vulnerability
 
 The parts of this repository that could actually carry one are `agents/`,

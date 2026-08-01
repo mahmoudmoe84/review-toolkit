@@ -430,15 +430,24 @@ for a reason that has nothing to do with the reviewer. (`gitleaks` is *not* need
 declares a secret scanner, which is exactly why that rule is one of the two shipping
 untested.)
 
-**The rails ride along as a mechanism now, not just as prose.** `plants/.claude/settings.json`
-travels with the `cp -R`, so every lab enforces deny rules for the three promises the agent
-prompts make — never install, never `--fix` or format, never a state-changing git command —
-at the harness level, with no step anyone can forget. Stated honestly, the way this repo
-states things: prefix deny rules are a **tripwire, not a sandbox**. A chained or re-spelled
-command can evade them, so the prompt rails stay primary and the read-only outcome check
-(tree hash before and after a run) stays the verification. The mechanized layer catches the
-routine violation, which is the common one. (Added 2026-08-01 — before that, all three
-promises were prose in the agent files, which is the exact defect this kit exists to catch.)
+**The rails are a mechanism *here*, and prose everywhere else.** `plants/.claude/settings.json`
+travels with the `cp -R`, so every **lab** enforces deny rules for the three promises the
+agent prompts make — never install, never `--fix` or format, never a state-changing git
+command — at the harness level, with no step anyone can forget. **In any other repository
+those same three promises are back to being prose in the agent files, unless you copy that
+settings file into the target repo yourself** — the second-line step in
+[SECURITY.md's untrusted-review procedure](SECURITY.md#reviewing-code-you-do-not-own).
+Stated honestly, the way this repo states things: prefix deny rules are a **tripwire, not a
+sandbox**. A chained or re-spelled command can evade them, so the prompt rails stay primary
+and the read-only outcome check (tree hash before and after a run) stays the verification.
+The mechanized layer catches the routine violation, which is the common one.
+
+*(Corrected 2026-08-01: this paragraph said the rails ride along "with no step anyone can
+forget," full stop — true of the plant lab, and an overclaim everywhere else, written the
+same day three agents were installed for real use where no such file exists. Same pattern
+this page keeps catching in itself: a mechanism verified in one scope, described as though
+it covered every scope. Added the same day — before that, all three promises were prose in
+the agent files, which is the defect this kit exists to catch.)*
 
 Protocol, prompts, criteria and log: [VERIFICATION.md](VERIFICATION.md). The answer key,
 [RUNBOOK.md](RUNBOOK.md), stays at the repo root and never inside `plants/`, so it cannot
