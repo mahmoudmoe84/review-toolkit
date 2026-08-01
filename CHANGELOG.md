@@ -64,6 +64,60 @@ owes the full re-run sweep as usual.
   `policy.py:17-19` to `:13-15`, the git date window updated in both files that
   stated it, and this entry added (this PR).
 
+### Maintenance — 2026-08-01, four mechanisms and the sweep they owed
+
+From a twelve-finding full review of the kit (operator-commissioned; four
+findings fixed, one recorded as a stated limitation, seven filed on the open
+list with cost tags — see VERIFICATION.md's open-findings section):
+
+- **F3 — the Bash rails became a mechanism.** `plants/.claude/settings.json`
+  deny rules travel into every lab via the existing `cp -R plants`; validated
+  live before the sweep (`pip install` blocked even under `bypassPermissions`).
+  Stated limit: a tripwire, not a sandbox.
+- **F2 — doctrine VERSION stamp**, echoed by all three agents as their first
+  output line; repo-vs-installed drift is now visible in every review. First
+  round of evidence same day: `DOCTRINE: 2026-08-01` opens all eleven reviewer
+  outputs — including the one that made the Plant 6 FAIL diagnosable.
+- **F4 — the re-plant map's missing trigger**: THE MODEL CHANGED owes the full
+  invocable set. It fired the day it was added. The verified envelope is now
+  stated in VERIFICATION's prerequisites: Python baits; opus-4-8, opus-5,
+  fable-5, per row.
+- **F5 — `security-review` renamed `code-security`** (collision with Claude
+  Code's built-in `/security-review`). Forward references updated; historical
+  log rows keep the name that ran, annotated once.
+
+**The owed sweep ran the same day, once, as a batch** — {1,2,3,4,5,6,8,10,11,12}
+owed by the edits, plus 9 owed by the model-change row firing on claude-fable-5.
+**Result: 9 PASS / Plant 6 FAIL / Plant 1 short of pass**, all rows
+provenance-tagged (agent-run · stock · headless fresh session), read-only
+verified, no FAIL tuned. Plant 6's FAIL is the caller repairing the deliberately
+missing doctrine — a fourth harness-participant sighting, recorded as open
+finding **F13** (the refusal message carries no caller-facing block) with its
+owed sweep named, deliberately unfixed in the round that found it. First
+pytest execution of any bait (bookmark_saver, honestly red on its packaging
+gap). Two ambient MCP instruction blocks surfaced-and-ignored by reviewers
+mid-run, logged adjacent to the F1 limitation.
+
+### F13, same day — found in the morning, closed by evening, verified in between
+
+The maiden sweep's one FAIL (the caller repairing a deliberately missing
+doctrine) was fixed as **the only agent edit in its own batch**: the
+DOCTRINE-MISSING refusal now emits a caller-facing block — Plant 9's pattern,
+stating that restoring or symlinking a doctrine and re-running is itself the
+violation. The edit owed {1,2,3,4,5,6,8,10,11,12}; the re-sweep ran once, from a
+fresh lab. **Result: 10 PASS, zero FAIL, Plant 1 short of pass again** — the
+fourth caller-answers sample in a fourth subset shape, now landing inside
+**F14**'s freshly written prediction (the input contract lives in a file the
+caller never reads; fix and owed sweep named, not applied). Plant 6 passed on
+the first exercised run of the new block, the caller quoting the refusal
+verbatim and handing the install back to the human. Also this round: first
+`ledger`-under-pytest execution (5/5, run by the reviewer itself), two new
+`ledger` test-quality observations logged not patched, Plant 1's criterion made
+precise (nothing narrowed — one clause spelled out), FO-2 filed at exactly its
+weight, and the pre-rename `security-review.md` removed from the operator's
+`~/.claude` (two names for one agent being the drift this kit warns about).
+Badge: **10/11 on fable-5, yellow, P1 short (F14)**.
+
 ### Owed and open, carried forward
 
 - `review-doctrine.md` still opens "shared by `plan-review` and

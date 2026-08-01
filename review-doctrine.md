@@ -1,4 +1,7 @@
 # Review Doctrine — shared by plan-review and code-excellence
+VERSION: 2026-08-01 — bumped on every edit to this file. Each agent opens its
+output with this line (`DOCTRINE: 2026-08-01`), so every review states which
+doctrine governed it and a drifted install is visible in the output itself.
 Both reviewer agents read this file before doing anything. It is the single home of
 the shared rules; the agent files contain only what is unique to each.
 
