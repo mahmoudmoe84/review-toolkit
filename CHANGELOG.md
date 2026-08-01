@@ -132,6 +132,21 @@ refusing branch as a new untested claim, filed the same day as **F15**
 every declared suite has now executed under a reviewer, `tenant_notes` and
 `tokenring` for the first time. Badge unchanged at 10/11 yellow.
 
+### F14, same day — the third relocation, and 11/11 on fable-5
+
+The input contract moved into `plan-review`'s frontmatter description (the one
+surface the harness shows a calling session), the only edit in its batch, with
+the law named in the file: the caller-side halt rule, the doctrine-repair rule,
+and now the input contract each had to move into what the caller actually reads.
+The owed sweep {1, 2, 3, 4} ran once: **4 PASS, including Plant 1's first full
+parent-layer pass ever** — the fifth agent-driven sample, and the first that
+could read the contract, recited all three inputs from it. Badge: **11/11 on
+fable-5, yellow, three rules untested** (secret-scanner history, honest
+nothing-to-add, and F15 — SAFE MODE's refusing branch). Also this span, on the
+operator's instruction: `code-security` installed to `~/.claude/agents/`
+user-level — the human install decision the README defers to, made and hash
+logged.
+
 ### Owed and open, carried forward
 
 - `review-doctrine.md` still opens "shared by `plan-review` and
